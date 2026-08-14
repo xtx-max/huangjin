@@ -84,8 +84,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：Analysis.vue 重写。前端计算 MA20/60/120(不足N天为null)、日收益率、年波动率(样本标准差×√252)、年化收益率(252日折算)、最大回撤及日期、区间总涨幅；价格+均线叠加图与回撤子图双图联动；区间切换(近1/5/10/20年/全部)。npm run build 零错误；dev 模块 200；Python 同公式复核：近20年总涨幅+686.77%、年化+10.65%、年波动率17.30%、最大回撤-44.64%@2015-12-17 与史实一致。"
     },
     {
       "id": "US-006",
