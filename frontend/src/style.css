@@ -92,7 +92,7 @@ body {
 .el-card {
   border-radius: 18px;
   border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 16px 40px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
 .el-card__header {
@@ -100,7 +100,7 @@ body {
 }
 
 .el-card__body {
-  padding: 24px;
+  padding: 28px;
 }
 
 .el-dialog {
@@ -140,11 +140,16 @@ body {
 }
 
 .el-table td.el-table__cell {
-  padding: 12px 0;
+  padding: 13px 0;
+  border-bottom: 1px solid #f2f2f6;
+}
+
+.el-table::before {
+  display: none;
 }
 
 .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
-  background-color: #fafafc;
+  background-color: #ffffff;
 }
 
 .el-table .el-table__body tr:hover > td.el-table__cell {
@@ -157,6 +162,47 @@ body {
 
 .el-message {
   border-radius: 14px;
+}
+
+.el-select__wrapper,
+.el-input__wrapper,
+.el-date-editor {
+  border-radius: 10px;
+}
+
+.el-tag {
+  border-radius: 980px;
+  padding: 0 10px;
+  font-weight: 500;
+}
+
+/* iOS 分段控件风格的 radio 组（时间范围/视图切换） */
+.el-radio-group {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 980px;
+  padding: 3px;
+}
+
+.el-radio-button__inner {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-color-regular) !important;
+  border-radius: 980px !important;
+  padding: 6px 16px !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.el-radio-button.is-active .el-radio-button__inner {
+  background: #ffffff !important;
+  color: var(--text-color-primary) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12) !important;
+}
+
+.el-radio-button__original-radio:checked + .el-radio-button__inner {
+  background: #ffffff !important;
+  color: var(--text-color-primary) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Common Typography Utilities */

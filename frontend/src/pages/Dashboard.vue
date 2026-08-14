@@ -364,14 +364,17 @@ function changeClass(v: number | null): string {
 }
 .stat-card {
   border: none;
-  border-radius: 16px;
+  border-radius: 18px;
+}
+.stat-card :deep(.el-card__body) {
+  padding: 22px 26px;
 }
 .stat-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  color: #57544c;
+  font-size: 13px;
+  color: #6e6e73;
 }
 .stat-main {
   display: flex;
@@ -380,9 +383,11 @@ function changeClass(v: number | null): string {
   margin-top: 12px;
 }
 .stat-price {
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 600;
-  color: #2b2924;
+  letter-spacing: -0.03em;
+  color: #1d1d1f;
+  line-height: 1.1;
 }
 .stat-change {
   font-size: 16px;
@@ -399,7 +404,7 @@ function changeClass(v: number | null): string {
   color: #5a9167;
 }
 .stat-date {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 12px;
   color: #8a877d;
 }
