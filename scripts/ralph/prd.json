@@ -1,0 +1,171 @@
+{
+  "project": "黄金市场行情分析站（GPAFP 静态化改造）",
+  "branchName": "ralph/gold-market-analysis",
+  "description": "将 fork 的 GPAFP（Vue3+Vite+Element Plus+ECharts，位于仓库根 frontend/ 目录）静态化改造为纯前端黄金行情分析站：国际金价 1970 至今（2004 起日线、1970-2004 月度）+ 国内金价 Au99.99 日线（2004 起）、影响黄金的全球事件库与详细分析、金价指标分析、黄金新闻、GitHub Pages 部署。无后端，数据以 JSON 打包进前端。中文界面。",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "静态化改造基座：移除后端与登录鉴权",
+      "description": "项目是 fork 的 GPAFP（Vue3 + Vite + Element Plus + ECharts，前端代码在仓库根 frontend/ 目录，Python 后端在 backend/ 目录）。作为开发者，我要移除后端依赖与登录鉴权，使前端能独立构建为纯静态站点。",
+      "acceptanceCriteria": [
+        "删除 backend/ 目录及根目录 start.bat、start.ps1、start_services.ps1",
+        "删除前端以下页面及对应路由/菜单：Login、Register、ChangePassword、UserManagement、Feedback、Settings、Monitor（及其组件目录中只被这些页面使用的组件）",
+        "删除 src/services/api.ts（axios）及所有 import 它的代码；删除 store 中 token/用户相关逻辑与路由登录守卫，访问 / 不再跳转 /login",
+        "保留 Dashboard.vue、Market.vue、Analysis.vue、News.vue 四个页面骨架，它们可以先显示占位内容",
+        "cd frontend && npm run build 零错误通过（vue-tsc 无任何 TS 报错）",
+        "cd frontend && npm run dev 后用浏览器打开，根路径不跳转登录页",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "数据获取脚本与金价静态数据文件",
+      "description": "作为开发者，我要一个一键脚本生成金价静态数据文件，使页面无需后端即可展示历史行情。新建 scripts/fetch_gold_data.py（仅用 Python3 标准库 urllib/json，无第三方依赖），生成 frontend/src/data/gold-prices.json。",
+      "acceptanceCriteria": [
+        "scripts/fetch_gold_data.py 用标准库实现：①国际日线 2004-06 至今下载 https://raw.githubusercontent.com/FeziweMelvin/XAUUSD-Gold-Price/main/XAU_1d_data.csv（分号分隔，列 Date;Open;High;Low;Close;Volume，日期格式 2004.06.11 00:00）；②国际月度 1970-01 至 2004-05 下载 https://datahub.io/core/gold-prices/r/monthly.csv（列 Date,Price，取 USD 月度定盘价，截取 2004-06 之前）；③国内日线 2004-01 至今：HTTP POST http://api.tushare.pro 调 sge_daily 接口，ts_code=Au99.99，按 start_date/end_date 分页循环（每次最多 2000 行）拉全量，token 从仓库根 .env 读 TUSHARE_TOKEN，不得硬编码",
+        "输出 frontend/src/data/gold-prices.json，结构：{ \"internationalDaily\": [{date,open,high,low,close}], \"internationalMonthly\": [{date,price}], \"domestic\": [{date,open,high,low,close}] }，日期统一为 YYYY-MM-DD 字符串",
+        "脚本运行成功且幂等（重复运行覆盖输出）；python3 -m py_compile 通过",
+        "internationalDaily 条数 ≥5000 且首条日期 ≤2004-07-01；internationalMonthly 首条 ≤1970-02 且末条 ≥2004-04；domestic 条数 ≥4000 且首条 ≤2004-01-15",
+        "JSON 不包含任何 token 或密钥；.env 保持 gitignore（不提交）",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "首页行情总览（Dashboard 改造）",
+      "description": "作为用户，我要在首页看到国际与国内金价的最新价与走势图，打开网站即了解行情。改造 frontend/src/pages/Dashboard.vue：读取 src/data/gold-prices.json，用 ECharts 展示折线图。",
+      "acceptanceCriteria": [
+        "顶部卡片展示：国际金价最新收盘价、日涨跌额、日涨跌幅；国内金价（元/克）同样三指标；数据取 gold-prices.json 最后一条与倒数第二条计算",
+        "ECharts 折线图展示价格序列，X 轴日期；提供范围切换按钮：1月/6月/1年/5年/全部，点击后图表数据按范围截取",
+        "提供国际/国内切换（可切换图表显示 internationalDaily 或 domestic 序列；或两张图上下排列，均须可见切换生效）",
+        "页面只读本地 JSON，无任何网络请求；图表在无数据时不崩溃",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "历史数据记录页（Market 改造）",
+      "description": "作为用户，我要查询任意区间的历史金价明细与区间统计，了解过往所有金价波动记录。改造 frontend/src/pages/Market.vue。",
+      "acceptanceCriteria": [
+        "表格列出历史行情：日期、开、高、低、收、日涨跌幅；数据源 gold-prices.json，默认显示国际日线最近 100 条，分页每页 50 条",
+        "日期区间筛选（起始/结束日期选择器）生效：筛选后表格与统计同步更新",
+        "统计栏展示当前区间的：最高收盘价及日期、最低收盘价及日期、平均收盘价、区间累计涨跌幅（区间末值/区间首值-1）",
+        "国际/国内切换（表格与统计切换 internationalDaily/domestic）；另有\"全部历史(月度)\"视图，合并展示 internationalMonthly + internationalDaily（1970 至今）",
+        "无网络请求；数据缺失时显示空态提示",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "金价波动分析页（Analysis 改造）",
+      "description": "作为用户，我要看到均线/年化收益/波动率/最大回撤等技术分析，理解金价波动特征。改造 frontend/src/pages/Analysis.vue，全部计算在前端完成（基于 gold-prices.json 的 internationalDaily，如 >1500 条可默认取近 20 年子集）。",
+      "acceptanceCriteria": [
+        "ECharts 图 1：收盘价 + MA20/MA60/MA120 三条均线叠加（均线=前 N 个交易日收盘价简单平均，不足 N 天不显示）",
+        "ECharts 图 2：回撤子图，每日回撤 = 当日收盘/截至当日历史最高收盘 - 1，展示百分比",
+        "指标卡片：所选区间年化收益率、年波动率（日收益率标准差 × sqrt(252)）、最大回撤及发生日期、区间总涨幅",
+        "提供区间选择（近1年/近5年/近10年/近20年/全部）并联动两图与指标",
+        "区间改变时全部指标前端重算；无网络请求",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "影响黄金的全球事件库数据",
+      "description": "作为用户，我要内置影响黄金的全球大事件及每件事的详细分析，理解金价背后的驱动事件。新建 frontend/src/data/events.json：人工撰写的中文内容，≥30 件 1971-2025 年间影响金价的全球事件。",
+      "acceptanceCriteria": [
+        "events.json 为合法 JSON，events 数组 ≥30 件，按 date 升序",
+        "每件事件字段：id（字符串）、date（YYYY-MM-DD）、title、category（地缘政治/货币政策/金融危机/战争冲突/公共卫生/供需变化/其他）、region、summary（一句话）、impact（利好金价/利空金价/中性）、analysis（200-500 字详细中文分析，包含事件背景、对金价的传导机制、当时金价表现、历史启示）",
+        "必须覆盖以下里程碑事件（日期须真实）：1971 尼克松冲击、1973 石油危机、1979 伊朗革命+苏联入侵阿富汗、1980 金价历史高点、1987 黑色星期一、1990 海湾战争、1999 央行售金协议、2001 九一一、2003 伊拉克战争、2008 金融危机、2011 欧债危机+金价历史新高、2013 金价暴跌、2016 英国脱欧、2018 中美贸易战、2020 新冠疫情、2022 俄乌冲突、2023 硅谷银行事件、2024 美联储降息周期",
+        "随机抽查 3 件事的 analysis 均为完整中文段落且与事件真实历史相符",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "事件时间线页",
+      "description": "作为用户，我要按时间浏览影响黄金的事件时间线，快速定位重要节点。新增路由 /events 与页面 frontend/src/pages/Events.vue，数据源 src/data/events.json，导航菜单加\"事件\"入口。",
+      "acceptanceCriteria": [
+        "时间线按 date 升序渲染全部事件，按年份分组显示年份标题",
+        "每条显示：日期、标题、category 标签、region、impact 徽章（利好/利空/中性用不同颜色）",
+        "筛选器：按 category 下拉、按 impact 下拉筛选，筛选后时间线即时更新",
+        "点击事件弹出详情对话框，完整显示 summary 与 analysis；对话框可关闭",
+        "时间线无数据/筛选无结果时显示空态文案",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "事件-金价关联标注与涨跌幅统计",
+      "description": "作为用户，我要在价格图上看到事件标注并查看事件前后金价涨跌幅，直观理解事件对金价的影响。在 Dashboard.vue 或 Analysis.vue 的国际金价图上叠加事件标注，并新增事件影响统计模块。",
+      "acceptanceCriteria": [
+        "国际金价图上用 ECharts markPoint 标注 events.json 中所有日期落在数据范围内的事件点，tooltip 悬浮显示事件标题与日期",
+        "点击事件标注点弹出该事件详情对话框（复用 US-007 的详情组件或等价展示 summary+analysis）",
+        "新增\"事件影响统计\"区：表格列出每个事件的前 30 日、后 30 日、后 90 日、后 365 日金价涨跌幅（用 internationalDaily+internationalMonthly 最近收盘价计算；标注点日收盘价为基准，数据不足时显示\"-\"），按 |后30日涨跌幅| 降序，支持点击行跳转图上对应标注",
+        "对 2008-09-15（雷曼）事件抽查：其后 365 日金价应为上涨（正收益），表格数值与 JSON 数据手工计算一致",
+        "无网络请求；事件日期无对应数据时不崩溃",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "黄金新闻页与新闻更新脚本",
+      "description": "作为用户，我要看到最新黄金相关新闻快讯，跟踪市场动态。改造 frontend/src/pages/News.vue（静态列表+详情），并新增 scripts/fetch_news.py（tushare news 快讯接口，token 从仓库根 .env 读）。",
+      "acceptanceCriteria": [
+        "新建 frontend/src/data/news.json，预置 ≥20 条黄金相关中文快讯（真实事件：美联储利率决议、央行购金、地缘冲突与金价关系、金价创新高等），字段：id/title/time/source/summary/content",
+        "News.vue 渲染快讯列表（标题、时间、来源、摘要），点击展开/跳转详情显示完整 content；无网络请求",
+        "scripts/fetch_news.py：HTTP POST http://api.tushare.pro 调 news 接口（api_name=news，start_date/end_date 取最近 30 天），token 从 .env 读；成功则把含\"金\"的标题条目合并输出到 news.json 顶部（去重，最多 50 条）；若接口返回权限不足（code 非 0），打印明确提示并以退出码 0 结束，不覆盖现有 news.json",
+        "python3 -m py_compile scripts/fetch_news.py 通过；脚本运行不崩溃（无论权限如何）",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "GitHub Pages 部署配置与构建验证",
+      "description": "作为用户，我要一键构建出可部署的静态产物，拿到公网可访问的版本。配置 vite 相对路径、GitHub Actions 工作流与中文部署说明。",
+      "acceptanceCriteria": [
+        "frontend/vite.config.ts 设置 base:'./'，确保构建产物资源全部为相对路径（检查 dist/index.html 中 src/href 不含以 / 开头的绝对路径）",
+        "新增 .github/workflows/deploy.yml：on push main 触发；job：checkout→setup-node 20→cd frontend && npm ci && npm run build→actions/deploy-pages@v4 部署；使用 permissions pages:write/id-token:write；不包含任何密钥明文",
+        "新增根 README.md（中文）：项目简介、数据来源与覆盖范围说明（国际日线 2004-今/月度 1970-2004、国内 Au99.99 日线 2004-今）、本地运行命令（cd frontend && npm install && npm run dev）、构建命令、GitHub Pages 部署步骤（含 Settings→Pages 选 GitHub Actions 的说明）",
+        "cd frontend && npm run build 成功且 dist/ 存在 index.html 与 assets；用 python3 校验 deploy.yml 为合法 YAML",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Ralph Progress Log
+Started: 2026-08-14 12:00:03 +0800
+---
+
+## 共享上下文（每个迭代先读这里）
+- 项目：GPAFP 静态化改造的黄金行情分析站（详见仓库根 AGENTS.md，务必先读）
+- 前端目录：frontend/；构建验证：cd frontend && npm run build（vue-tsc 必须零错误）
+- 依赖已安装（node_modules 存在）；Python 脚本仅标准库，用 python3
+- 数据源已验证可用（见 AGENTS.md）；tushare token 在仓库根 .env（gitignored，禁止提交/泄露）
+- 事件库/新闻为中文人工撰写内容，事实必须真实（日期、事件名、金价反应）
+- UI 验证：npm run dev 起 vite（默认 5173 端口），用 dev-browser skill 检查
+- 每次迭代只实现一个故事；完成后 commit: feat: US-0XX - 标题
