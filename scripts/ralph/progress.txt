@@ -10,3 +10,10 @@ Started: 2026-08-14 12:00:03 +0800
 - 事件库/新闻为中文人工撰写内容，事实必须真实（日期、事件名、金价反应）
 - UI 验证：npm run dev 起 vite（默认 5173 端口），用 dev-browser skill 检查
 - 每次迭代只实现一个故事；完成后 commit: feat: US-0XX - 标题
+
+## 已实测事实（2026-08-14）
+- tushare `news`（新闻快讯）接口：当前 token 返回 code=40203 无权限（新闻类接口需单独开通，与积分无关）。
+  US-009 的 fetch_news.py 必须按"权限不足→打印提示→退出码0→不覆盖 news.json"路径实现；新闻内容以人工维护的静态 news.json 为主。
+- tushare `sge_daily`（Au99.99）：code=0 可用，数据始于 2004-01-02，单次最多 2000 行，需按日期分页。
+- tushare `sge_basic` 可用；`fut_daily` 对 SHFE.AU0 返回 0 行（不用）。
+- 国际日线数据文件 XAU_1d_data.csv（FeziweMelvin/XAUUSD-Gold-Price）覆盖 2004-06-11 至今、约 5400 行，分号分隔。
