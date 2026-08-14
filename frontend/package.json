@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "vue-tsc && vite build && python3 ../scripts/inline_build.py",
     "preview": "vite preview"
   },
   "dependencies": {
