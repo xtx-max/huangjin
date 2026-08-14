@@ -23,3 +23,9 @@ Started: 2026-08-14 12:00:03 +0800
 - 变更：删除 backend/、start*.ps1/bat；删除 Login/ChangePassword/UserManagement/Feedback/Settings/Monitor 页、auth/analysis 组件、useCaptcha、services/api.ts、store、utils；vite.config 移除 /api 代理；main.ts 移除 pinia；package.json 移除 axios/pinia/vue-quill/marked；App.vue 菜单改为 行情总览/历史数据/波动分析/黄金新闻。
 - 验证：npm run build 零错误（vue-tsc）；dev 服务器根路径 HTTP 200；grep 无 axios|/api|localStorage|/login|createPinia 残留。
 - 复用经验：四个页面目前是 el-empty 占位骨架，后续故事直接填充；Element Plus 中文 locale 已配置。
+
+## 2026-08-14 — US-002 数据获取脚本与金价静态数据 ✅
+- 新增 scripts/fetch_gold_data.py（仅标准库）；macOS python.org Python 需 certifi 做 SSL（已内置 fallback：certifi→系统默认，校验失败给中文指引，绝不禁用校验）。
+- tushare sge_daily 分页陷阱：①窗口首日可能是周末导致"窗口最早>窗口起点"误判触底；②必须按"本窗口"最早日期判断而非全局。最终改为以 2004-01-01 硬下限逐 3 年窗口回溯，8 次调用拉全 5498 行。
+- 数据事实：1970-01 国际金价 $35/盎司、2004-01-02 国内 Au99.99 ¥111.18/克，均与史实相符。
+- 已知缺口：国际日线镜像（FeziweMelvin/XAUUSD-Gold-Price）尾端 2025-06-06，落后约 14 个月；国内 tushare 数据到 2026-08-13 实时。US-010 的 CI 定时刷新（Yahoo 在美国可用）或手动重跑脚本可补尾端。

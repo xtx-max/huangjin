@@ -34,8 +34,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：scripts/fetch_gold_data.py 仅标准库+certifi SSL；输出 842KB gold-prices.json。internationalDaily 5391 行(2004-06-11~2025-06-06)、internationalMonthly 413 行(1970-01~2004-05)、domestic 5498 行(2004-01-02~2026-08-13)；py_compile 通过；覆盖自检全过；JSON 无密钥。已知缺口：国际日线源镜像尾端停在 2025-06-06，刷新机制留到 US-010 CI 处理。"
     },
     {
       "id": "US-003",
