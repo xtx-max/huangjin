@@ -1,5 +1,6 @@
 // 实时世界事件：标题关键词自动分类 / 影响方向 / 自动生成机制分析
 import type { GoldEvent } from '@/data/events'
+import { buildAutoAnalysis } from '@/utils/autoAnalysis'
 
 export type EventImpact = GoldEvent['impact']
 
@@ -24,27 +25,6 @@ const REGION_RULES: Array<[RegExp, string]> = [
   [/日本|韩国|印度|亚洲|亚太/, '亚洲'],
 ]
 
-const MECHANISM: Record<string, string> = {
-  货币政策:
-    '利率与货币条件是黄金定价的核心变量：央行加息/缩表会推升实际利率、走强美元，抬高持有黄金的机会成本，压制金价；反之降息/宽松压低实际利率，黄金相对吸引力上升。市场通常提前交易政策预期，决议落地后常有"卖预期、买事实"的反转。',
-  战争冲突:
-    '地缘冲突通过避险需求渠道影响金价：不确定性上升时资金涌入黄金对冲尾部风险，历史经验显示冲突升级阶段金价脉冲式冲高，而局势明朗或停火预期形成后避险溢价快速回吐。若冲突波及能源供应或美元信用，影响会更持久。',
-  金融危机:
-    '金融动荡对金价的影响分两阶段：危机初期"现金为王"，机构为回补流动性被迫抛售黄金，金价可能不涨反跌；随后央行出手救市、利率走低，黄金在宽松环境中收复失地并走强。危机的规模越大，央行的宽松力度越大，黄金的后续行情越可观。',
-  公共卫生:
-    '公共卫生事件通过"避险+宽松"双通道影响黄金：经济停摆风险推升避险需求，同时各国央行降息放水、财政扩张，实际利率下行利好黄金。但当恐慌演变为流动性危机时，黄金短期也会被抛售换现金。',
-  地缘政治:
-    '政治与贸易事件通过避险情绪、通胀预期与美元信用三条渠道作用于金价：关税与制裁推升通胀预期，政局不稳削弱风险偏好，美元信用受损时黄金的储备替代需求上升。事件冲击多为脉冲式，趋势仍需结合利率与美元方向判断。',
-  供需变化:
-    '黄金的供需结构是价格的中长期基石：央行购金、ETF 资金流入代表刚性需求，矿山产量与再生金供应相对稳定。官方买盘对价格不敏感、趋势性强，是近年金价中枢上移的重要支撑；而供给端的大规模抛售或库存迁徙会带来阶段性压力。',
-}
-
-const IMPACT_NOTE: Record<EventImpact, string> = {
-  利好金价: '综合标题信息判断，该事件整体偏向利好金价，可能推动避险或宽松预期交易。',
-  利空金价: '综合标题信息判断，该事件整体偏向利空金价，可能带来实际利率上行或风险偏好修复。',
-  中性: '该事件对金价的方向性影响暂不明确，市场影响取决于后续细节与政策反应。',
-}
-
 export interface LiveEventInput {
   title: string
   date: string
@@ -67,18 +47,14 @@ export function guessRegion(title: string): string {
 
 /** 自动生成实时事件的结构化分析（明确标注自动生成、不构成投资建议） */
 export function buildLiveAnalysis(input: LiveEventInput, category: string, impact: EventImpact): string {
-  const mech = MECHANISM[category] ?? MECHANISM['地缘政治']
-  const summary = input.content.length > 80 ? input.content.slice(0, 80) + '…' : input.content
-  return [
-    '【事件背景】',
-    `${input.title}（${input.source}，${input.date}）。${summary} 本条为实时抓取的全球事件，事件全貌仍在演进中，以上为公开快讯信息，后续细节可能变化。`,
-    '【对金价的影响机制】',
-    `${IMPACT_NOTE[impact]}${mech}`,
-    '【如何进一步跟踪】',
-    '可在本站「波动分析-事件归因」查看历史同类事件前后 30/90/365 日的实际金价表现，在「金价预测」页结合统计趋势与当前行情综合判断；待本事件进入人工整理的事件库后，将补充完整的市场反应数据与历史启示。',
-    '【风险提示】',
-    '本条分析由系统按事件类型自动生成，仅供参考，不构成任何投资建议。',
-  ].join('\n')
+  return buildAutoAnalysis({
+    title: input.title,
+    date: input.date,
+    source: input.source,
+    summary: input.content.slice(0, 80) + (input.content.length > 80 ? '…' : ''),
+    category,
+    impact,
+  })
 }
 
 export function toLiveEvent(

@@ -119,6 +119,8 @@ import {
   Refresh,
 } from '@element-plus/icons-vue'
 import { loadNews, type NewsItem } from '@/data/news'
+import { classifyEvent } from '@/utils/eventClassify'
+import { buildAutoAnalysis } from '@/utils/autoAnalysis'
 import { usePageMotion } from '@/composables/usePageMotion'
 
 const items = loadNews()
@@ -190,9 +192,15 @@ function toNewsItem(raw: EmItem, idx: number): NewsItem {
     summary: content.length > 60 ? content.slice(0, 60) + '…' : content,
     content: content || title,
     link: raw.url || raw.uniqueUrl,
-    impact: '中性',
-    analysis:
-      '本条为实时抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。',
+    impact: classifyEvent(title).impact,
+    analysis: buildAutoAnalysis({
+      title,
+      date: time,
+      source: raw.mediaName || '东方财富',
+      summary: content,
+      category: classifyEvent(title).category,
+      impact: classifyEvent(title).impact,
+    }),
   }
 }
 
