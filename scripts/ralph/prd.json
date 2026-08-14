@@ -67,8 +67,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：Market.vue 重写。三视图(国际日线/国内日线/全部历史月度合并1970-今共5804行)；日期区间筛选+重置；统计栏(区间最高/最低及日期、平均、累计涨跌幅)；分页50/页；涨跌幅红涨绿跌；空态提示。npm run build 零错误；dev 模块 200；Python 同公式独立复核通过(2020年国际金价低点1474.34@2020-03-19、高点2063.25@2020-08-06 与史实一致)。"
     },
     {
       "id": "US-005",
