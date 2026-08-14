@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-国际金价日线补全脚本（在 GitHub Actions 美国节点运行）
+国际金价日线补全脚本（GitHub Actions 定时运行）
 
-按顺序尝试数据源，取"晚于现有尾端"的交易日合并进 gold-prices.json：
-  1. Yahoo Finance GC=F（重试 3 次，机房 IP 可能被限流 429）
-  2. Dukascopy XAUUSD 现货日线（2025、2026 年度文件；与现有 MT4 现货序列同口径）
-  3. Stooq xauusd 现货 CSV
+主源：东方财富 push2his 日K接口（COMEX 黄金 GC00Y，全球可达、无密钥、无频率限制）
+备源：Yahoo Finance GC=F（重试；机房 IP 可能被限流 429）
+
+把晚于现有 internationalDaily 尾端的交易日合并进 gold-prices.json。
+注意：2025-06-06 之前为 XAUUSD 伦敦现货（MT4 源），之后为 COMEX 主力期货，
+两者价差通常 <1%，合并点可能存在微小跳变。
 
 用法: python3 scripts/fetch_intl_yahoo.py
 仅使用 Python 标准库；幂等；无任何密钥。
@@ -27,13 +29,27 @@ UA = {
         "(KHTML, like Gecko) Chrome/125.0 Safari/537.36"
     )
 }
+EM_KLINE_URL = (
+    "https://push2his.eastmoney.com/api/qt/stock/kline/get"
+    "?secid=101.GC00Y&klt=101&fqt=1&lmt=800&end=20500101"
+    "&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56"
+)
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=max&interval=1d"
+
+
+def make_ssl_context():
+    """优先用 certifi（macOS python.org 安装包默认不信任系统根证书）。"""
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        return ssl.create_default_context()
 
 
 def http_get(url: str, timeout: int = 90) -> str:
     req = urllib.request.Request(url, headers=UA)
-    ctx = ssl.create_default_context()
-    with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+    with urllib.request.urlopen(req, timeout=timeout, context=make_ssl_context()) as resp:
         return resp.read().decode("utf-8", errors="replace")
 
 
@@ -42,10 +58,6 @@ def http_get_json(url: str) -> dict:
 
 
 def norm_row(date_str: str, o, h, lo, c) -> dict:
-    for v in (o, h, lo, c):
-        if v is None:
-            o = h = lo = c = c
-            break
     return {
         "date": date_str,
         "open": round(float(o), 2),
@@ -53,6 +65,26 @@ def norm_row(date_str: str, o, h, lo, c) -> dict:
         "low": round(float(lo), 2),
         "close": round(float(c), 2),
     }
+
+
+def fetch_eastmoney() -> dict:
+    """东方财富 COMEX 黄金日K。fields2 顺序: 日期,开,收,高,低,量。"""
+    payload = http_get_json(EM_KLINE_URL)
+    data = payload.get("data") or {}
+    rows = {}
+    for line in data.get("klines", []):
+        parts = line.split(",")
+        if len(parts) < 6:
+            continue
+        try:
+            d, o, c, h, lo = parts[0], float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+        except ValueError:
+            continue
+        if c <= 0 or not d.startswith(("19", "20")):
+            continue
+        rows[d] = norm_row(d, o, h, lo, c)
+    print(f"  东方财富 COMEX 黄金：{len(rows)} 行")
+    return rows
 
 
 def fetch_yahoo() -> dict:
@@ -76,61 +108,8 @@ def fetch_yahoo() -> dict:
             last_err = exc
             print(f"  Yahoo 第 {attempt} 次失败（{exc}），等待后重试…")
             time.sleep(25 * attempt)
-    print(f"  提示：Yahoo 不可用（{last_err}），改用 Dukascopy。")
+    print(f"  提示：Yahoo 不可用（{last_err}）。")
     return {}
-
-
-def parse_dukascopy_line(line: str) -> dict | None:
-    parts = line.replace(",", ";").split(";")
-    if len(parts) < 6:
-        return None
-    try:
-        dt = datetime.strptime(parts[0].split(" ")[0], "%d.%m.%Y")
-        o, h, lo, c = (float(x) for x in parts[1:5])
-    except (ValueError, IndexError):
-        return None
-    if c <= 0:
-        return None
-    return norm_row(dt.strftime("%Y-%m-%d"), o, h, lo, c)
-
-
-def fetch_dukascopy() -> dict:
-    """Dukascopy XAUUSD 现货日线（与现有 MT4 现货序列同口径）。"""
-    rows = {}
-    for year in (2025, 2026):
-        url = f"https://datafeed.dukascopy.com/datafeed/XAUUSD/{year}/00/01/BID_candles_day_1.csv"
-        try:
-            text = http_get(url, timeout=120)
-        except Exception as exc:
-            print(f"  Dukascopy {year} 失败（{exc}）。")
-            continue
-        got = 0
-        for line in text.splitlines():
-            r = parse_dukascopy_line(line.strip())
-            if r:
-                rows[r["date"]] = r
-                got += 1
-        print(f"  Dukascopy {year}: {got} 行")
-    return rows
-
-
-def fetch_stooq() -> dict:
-    """Stooq xauusd CSV（现货）。"""
-    url = "https://stooq.com/q/d/l/?s=xauusd&i=d"
-    text = http_get(url, timeout=120)
-    rows = {}
-    for line in text.splitlines()[1:]:
-        parts = line.split(",")
-        if len(parts) < 5:
-            continue
-        try:
-            o, h, lo, c = (float(x) for x in parts[1:5])
-        except ValueError:
-            continue
-        if c <= 0:
-            continue
-        rows[parts[0]] = norm_row(parts[0], o, h, lo, c)
-    return rows
 
 
 def main():
@@ -140,14 +119,11 @@ def main():
     with open(OUT_PATH, encoding="utf-8") as f:
         data = json.load(f)
 
-    print("1/3 Yahoo Finance GC=F…")
-    rows = fetch_yahoo()
+    print("1/2 东方财富 COMEX 黄金日K…")
+    rows = fetch_eastmoney()
     if not rows:
-        print("2/3 Dukascopy XAUUSD…")
-        rows = fetch_dukascopy()
-    if not rows:
-        print("3/3 Stooq xauusd…")
-        rows = fetch_stooq()
+        print("2/2 Yahoo Finance GC=F…")
+        rows = fetch_yahoo()
     if not rows:
         print("所有数据源均不可用，本次不更新。")
         sys.exit(0)
