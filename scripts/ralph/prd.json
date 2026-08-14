@@ -149,8 +149,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：news.json 29 条真实黄金快讯(2024-01~2026-08，时间倒序，含美联储决议/央行购金/金价破3000·3200·3500/国内金价破900·950等，关键数字均用行情数据交叉验证)；News.vue 列表+详情对话框，无网络请求；fetch_news.py 实测权限不足(code=40203)时打印中文提示、退出码0、news.json md5 不变；py_compile 通过；npm run build 零错误。"
     },
     {
       "id": "US-010",

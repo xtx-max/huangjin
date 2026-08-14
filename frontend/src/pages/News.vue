@@ -6,16 +6,64 @@
           <div class="header-title">
             <el-icon><Reading /></el-icon>
             <span>黄金新闻</span>
+            <span class="count">共 {{ items.length }} 条</span>
           </div>
+          <el-tag size="small" type="info" effect="plain">
+            内容为人工整理快讯，可用 scripts/fetch_news.py 更新
+          </el-tag>
         </div>
       </template>
-      <el-empty description="黄金新闻功能开发中，敬请期待" />
+
+      <div v-if="items.length > 0" class="news-list">
+        <div v-for="n in items" :key="n.id" class="news-item" @click="openDetail(n)">
+          <div class="news-title-row">
+            <span class="news-title">{{ n.title }}</span>
+          </div>
+          <div class="news-meta">
+            <span class="news-time">{{ n.time }}</span>
+            <el-tag size="small" effect="plain">{{ n.source }}</el-tag>
+          </div>
+          <p class="news-summary">{{ n.summary }}</p>
+        </div>
+      </div>
+      <el-empty v-else description="暂无新闻" />
+
+      <el-dialog
+        v-model="dialogVisible"
+        :title="selected?.title ?? ''"
+        width="640px"
+        top="8vh"
+      >
+        <template v-if="selected">
+          <div class="detail-meta">
+            <span class="detail-time">{{ selected.time }}</span>
+            <el-tag size="small" effect="plain">{{ selected.source }}</el-tag>
+          </div>
+          <p class="detail-summary">{{ selected.summary }}</p>
+          <div class="detail-content-title">正文</div>
+          <p class="detail-content">{{ selected.content }}</p>
+        </template>
+        <template #footer>
+          <el-button @click="dialogVisible = false">关闭</el-button>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Reading } from '@element-plus/icons-vue'
+import { loadNews, type NewsItem } from '@/data/news'
+
+const items = loadNews()
+const dialogVisible = ref(false)
+const selected = ref<NewsItem | null>(null)
+
+function openDetail(n: NewsItem) {
+  selected.value = n
+  dialogVisible.value = true
+}
 </script>
 
 <style scoped>
@@ -28,8 +76,10 @@ import { Reading } from '@element-plus/icons-vue'
 }
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .header-title {
   display: flex;
@@ -38,7 +88,78 @@ import { Reading } from '@element-plus/icons-vue'
   font-weight: 600;
   font-size: 16px;
 }
-.header-title .el-icon {
-  color: #409eff;
+.count {
+  font-size: 12px;
+  font-weight: 400;
+  color: #909399;
+}
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.news-item {
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.news-item:hover {
+  border-color: #c8a24b;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+.news-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.news-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.news-time {
+  font-size: 12px;
+  color: #909399;
+}
+.news-summary {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.6;
+}
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-time {
+  font-size: 13px;
+  color: #909399;
+}
+.detail-summary {
+  margin: 12px 0;
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.7;
+}
+.detail-content-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 8px;
+}
+.detail-content {
+  font-size: 14px;
+  color: #303133;
+  line-height: 1.9;
+  text-align: justify;
 }
 </style>
