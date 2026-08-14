@@ -8,6 +8,15 @@
       title="统计预测声明"
       description="本页预测为基于历史价格的纯统计外推（线性回归 / Holt 双指数平滑），仅用于学习与演示，不构成任何投资建议。金价受宏观政策、地缘事件与央行行为影响，实际走势可能显著偏离预测区间，请勿据此交易。"
     />
+    <el-alert
+      v-if="dataAgeDays > 30"
+      type="info"
+      :closable="false"
+      show-icon
+      class="disclaimer reveal"
+      title="国际金价数据待更新"
+      :description="`当前国际金价数据截至 ${lastDate}（${dataAgeDays} 天前），每日自动补全任务运行后预测将基于最新行情；国内金价（Au99.99）数据为实时。`"
+    />
 
     <el-card shadow="never" class="page-card reveal">
       <template #header>
@@ -16,6 +25,7 @@
             <el-icon><Compass /></el-icon>
             <span>金价统计预测</span>
             <el-tag size="small" type="warning" effect="plain">国际金价 XAU/USD</el-tag>
+            <el-tag size="small" type="info" effect="plain">数据截至 {{ lastDate }}</el-tag>
           </div>
           <div class="header-controls">
             <span class="control-label">拟合区间</span>
@@ -144,6 +154,12 @@ const fitted = computed<number[]>(() => {
 
 const lastDate = computed(() => data.internationalDaily[data.internationalDaily.length - 1].date)
 const lastClose = computed(() => data.internationalDaily[data.internationalDaily.length - 1].close)
+
+/** 国际数据距今多少天（用于提示数据新鲜度） */
+const dataAgeDays = computed(() => {
+  const last = new Date(lastDate.value)
+  return Math.max(0, Math.floor((Date.now() - last.getTime()) / 86400000))
+})
 
 const fc = computed(() => forecastSeries(fitted.value, horizon.value, lastDate.value))
 

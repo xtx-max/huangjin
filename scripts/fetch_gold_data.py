@@ -65,7 +65,9 @@ def http_get(url: str, timeout: int = 60) -> str:
 
 def fetch_international_daily():
     """下载国际日线 CSV（分号分隔：Date;Open;High;Low;Close;Volume），
-    日期形如 '2004.06.11 00:00'，统一转成 YYYY-MM-DD。"""
+    日期形如 '2004.06.11 00:00'，统一转成 YYYY-MM-DD。
+    若现有 gold-prices.json 中有晚于该 CSV 尾端的数据（由 CI 从 Yahoo 补全），
+    一并保留合并，避免本地重跑把新数据覆盖回旧状态。"""
     text = http_get(XAU_DAILY_URL)
     rows = []
     for line in text.splitlines():
@@ -86,10 +88,20 @@ def fetch_international_daily():
             {"date": d.isoformat(), "open": o, "high": h, "low": low, "close": c}
         )
     rows.sort(key=lambda r: r["date"])
-    # 去重（同日期保留最后一条）
     dedup = {}
     for r in rows:
         dedup[r["date"]] = r
+    csv_max = max(dedup) if dedup else "2000-01-01"
+    # 合并现有 JSON 中晚于 CSV 尾端的日线（CI 用 Yahoo 补全的数据）
+    if os.path.exists(OUT_PATH):
+        try:
+            with open(OUT_PATH, encoding="utf-8") as f:
+                existing = json.load(f).get("internationalDaily", [])
+            for r in existing:
+                if r.get("date", "") > csv_max:
+                    dedup[r["date"]] = r
+        except (json.JSONDecodeError, OSError):
+            pass
     return [dedup[k] for k in sorted(dedup)]
 
 
