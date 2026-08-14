@@ -22,6 +22,7 @@
           <div class="news-meta">
             <span class="news-time">{{ n.time }}</span>
             <el-tag size="small" effect="plain">{{ n.source }}</el-tag>
+            <el-tag size="small" :type="impactTagType(n.impact)" effect="dark">{{ n.impact }}</el-tag>
           </div>
           <p class="news-summary">{{ n.summary }}</p>
         </div>
@@ -38,10 +39,20 @@
           <div class="detail-meta">
             <span class="detail-time">{{ selected.time }}</span>
             <el-tag size="small" effect="plain">{{ selected.source }}</el-tag>
+            <el-tag size="small" :type="impactTagType(selected.impact)" effect="dark">
+              {{ selected.impact }}
+            </el-tag>
           </div>
           <p class="detail-summary">{{ selected.summary }}</p>
           <div class="detail-content-title">正文</div>
           <p class="detail-content">{{ selected.content }}</p>
+          <div class="analysis-box">
+            <div class="detail-content-title analysis-title">
+              <el-icon><DataAnalysis /></el-icon>
+              <span>影响分析</span>
+            </div>
+            <p class="analysis-text">{{ selected.analysis }}</p>
+          </div>
         </template>
         <template #footer>
           <el-button @click="dialogVisible = false">关闭</el-button>
@@ -53,7 +64,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Reading } from '@element-plus/icons-vue'
+import { DataAnalysis, Reading } from '@element-plus/icons-vue'
 import { loadNews, type NewsItem } from '@/data/news'
 import { usePageMotion } from '@/composables/usePageMotion'
 
@@ -67,6 +78,12 @@ usePageMotion(pageRoot)
 function openDetail(n: NewsItem) {
   selected.value = n
   dialogVisible.value = true
+}
+
+function impactTagType(impact: string): 'danger' | 'success' | 'info' {
+  if (impact === '利好金价') return 'danger'
+  if (impact === '利空金价') return 'success'
+  return 'info'
 }
 </script>
 
@@ -164,6 +181,27 @@ function openDetail(n: NewsItem) {
 .detail-content {
   font-size: 14px;
   color: #303133;
+  line-height: 1.9;
+  text-align: justify;
+}
+.analysis-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(200, 162, 75, 0.08), rgba(200, 162, 75, 0.03));
+  border: 1px solid rgba(200, 162, 75, 0.25);
+  border-radius: 10px;
+}
+.analysis-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8a6d1f;
+  margin-bottom: 8px;
+}
+.analysis-text {
+  margin: 0;
+  font-size: 14px;
+  color: #5f5030;
   line-height: 1.9;
   text-align: justify;
 }
