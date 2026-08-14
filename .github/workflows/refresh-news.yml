@@ -1,0 +1,37 @@
+name: Refresh Gold News Daily
+
+on:
+  schedule:
+    # 每天 UTC 01:00（北京时间 09:00）
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch gold news
+        run: python3 scripts/fetch_news_rss.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add frontend/src/data/news.json
+            git commit -m "chore: 每日自动抓取黄金快讯入档"
+            git push
+          else
+            echo "无新增快讯，跳过提交"
+          fi

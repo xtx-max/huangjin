@@ -6,14 +6,50 @@
           <div class="header-title">
             <el-icon><Reading /></el-icon>
             <span>黄金新闻</span>
-            <span class="count">共 {{ items.length }} 条</span>
+            <span class="count">人工整理 {{ items.length }} 条</span>
           </div>
-          <el-tag size="small" type="info" effect="plain">
-            内容为人工整理快讯，可用 scripts/fetch_news.py 更新
-          </el-tag>
+          <div class="header-actions">
+            <el-button
+              size="small"
+              type="primary"
+              :loading="fetchState === 'loading'"
+              @click="fetchLiveNews"
+            >
+              <el-icon v-if="fetchState !== 'loading'"><Refresh /></el-icon>
+              {{ fetchState === 'loading' ? '抓取中…' : '刷新最新快讯' }}
+            </el-button>
+          </div>
         </div>
       </template>
 
+      <!-- 实时快讯（本次会话有效） -->
+      <div class="live-section reveal">
+        <div class="live-header">
+          <span class="live-title">
+            <span class="live-dot"></span>实时快讯
+          </span>
+          <span v-if="liveUpdatedAt" class="live-meta">
+            更新于 {{ liveUpdatedAt }} · {{ liveItems.length }} 条 · 来源：东方财富公开接口
+          </span>
+          <span v-else class="live-meta">
+            点击右上「刷新最新快讯」实时抓取金价相关快讯（本会话内有效）
+          </span>
+        </div>
+        <div v-if="liveItems.length > 0" class="live-list">
+          <div v-for="n in liveItems" :key="n.id" class="live-item" @click="openDetail(n)">
+            <div class="live-item-title">{{ n.title }}</div>
+            <div class="live-item-meta">{{ n.time }} · {{ n.source }}</div>
+          </div>
+        </div>
+        <div v-else class="live-empty">尚未抓取实时快讯</div>
+      </div>
+
+      <!-- 人工整理快讯（每日自动更新） -->
+      <div class="curated-title reveal">
+        <el-icon><Document /></el-icon>
+        <span>快讯归档</span>
+        <span class="count">每日由 GitHub Actions 自动抓取并入档</span>
+      </div>
       <div v-if="items.length > 0" class="news-list motion-list">
         <div v-for="n in items" :key="n.id" class="news-item" @click="openDetail(n)">
           <div class="news-title-row">
@@ -46,6 +82,16 @@
           <p class="detail-summary">{{ selected.summary }}</p>
           <div class="detail-content-title">正文</div>
           <p class="detail-content">{{ selected.content }}</p>
+          <el-button
+            v-if="selected.link"
+            size="small"
+            type="primary"
+            link
+            class="source-link"
+            @click="openSource(selected.link)"
+          >
+            <el-icon><Link /></el-icon> 查看原文
+          </el-button>
           <div class="analysis-box">
             <div class="detail-content-title analysis-title">
               <el-icon><DataAnalysis /></el-icon>
@@ -64,7 +110,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { DataAnalysis, Reading } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import {
+  DataAnalysis,
+  Document,
+  Link,
+  Reading,
+  Refresh,
+} from '@element-plus/icons-vue'
 import { loadNews, type NewsItem } from '@/data/news'
 import { usePageMotion } from '@/composables/usePageMotion'
 
@@ -75,9 +128,120 @@ const selected = ref<NewsItem | null>(null)
 const pageRoot = ref<HTMLElement | null>(null)
 usePageMotion(pageRoot)
 
+// ---- 实时快讯（东方财富公开接口，CORS 开放，无需密钥；双源回退） ----
+const LIVE_SEARCH_API =
+  'https://search-api-web.eastmoney.com/search/jsonp?cb=x&param=' +
+  encodeURIComponent(
+    JSON.stringify({
+      uid: '',
+      keyword: '黄金',
+      type: ['cmsArticleWebOld'],
+      client: 'web',
+      clientType: 'web',
+      clientVersion: 'curr',
+      param: {
+        cmsArticleWebOld: {
+          searchScope: 'default',
+          sort: 'default',
+          pageIndex: 1,
+          pageSize: 20,
+          preTag: '<em>',
+          postTag: '</em>',
+        },
+      },
+    }),
+  )
+const LIVE_COLUMNS_API =
+  'https://np-listapi.eastmoney.com/comm/web/getNewsByColumns?client=web&biz=web_news_col' +
+  '&column=351&order=1&needInteractData=0&page_index=1&page_size=50&req_trace=1'
+
+type FetchState = 'idle' | 'loading' | 'ok' | 'error'
+const fetchState = ref<FetchState>('idle')
+const liveItems = ref<NewsItem[]>([])
+const liveUpdatedAt = ref('')
+
+interface EmItem {
+  date?: string
+  showTime?: string
+  code?: string
+  title?: string
+  content?: string
+  summary?: string
+  mediaName?: string
+  url?: string
+  uniqueUrl?: string
+}
+
+const GOLD_RE = /黄金|金价|央行购金/
+
+function stripTags(s: string): string {
+  return s.replace(/<[^>]*>/g, '').trim()
+}
+
+function toNewsItem(raw: EmItem, idx: number): NewsItem {
+  const title = stripTags(raw.title || '')
+  const content = stripTags(raw.content || raw.summary || '')
+  const time = (raw.date || raw.showTime || '').slice(0, 16)
+  return {
+    id: `live-${raw.code || idx}`,
+    title,
+    time,
+    source: raw.mediaName || '东方财富',
+    summary: content.length > 60 ? content.slice(0, 60) + '…' : content,
+    content: content || title,
+    link: raw.url || raw.uniqueUrl,
+    impact: '中性',
+    analysis:
+      '本条为实时抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。',
+  }
+}
+
+async function fetchJsonOrJsonp(url: string): Promise<EmItem[]> {
+  const resp = await fetch(url)
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+  const text = await resp.text()
+  const start = text.indexOf('(')
+  const end = text.lastIndexOf(')')
+  const json = start >= 0 && end > start ? JSON.parse(text.slice(start + 1, end)) : JSON.parse(text)
+  return json?.result?.cmsArticleWebOld ?? json?.data?.list ?? []
+}
+
+async function fetchLiveNews() {
+  if (fetchState.value === 'loading') return
+  fetchState.value = 'loading'
+  try {
+    let list: EmItem[] = []
+    try {
+      list = await fetchJsonOrJsonp(LIVE_SEARCH_API)
+    } catch {
+      list = []
+    }
+    if (list.length === 0) {
+      list = await fetchJsonOrJsonp(LIVE_COLUMNS_API)
+    }
+    const gold = list.filter((r) => GOLD_RE.test(stripTags(r.title || ''))).slice(0, 20)
+    if (gold.length === 0) {
+      throw new Error('接口未返回金价相关快讯')
+    }
+    liveItems.value = gold.map(toNewsItem)
+    liveUpdatedAt.value = new Date().toLocaleString('zh-CN', { hour12: false })
+    fetchState.value = 'ok'
+    ElMessage.success(`已抓取 ${liveItems.value.length} 条最新金价快讯`)
+  } catch (e) {
+    fetchState.value = 'error'
+    ElMessage.error(
+      `实时快讯抓取失败（${e instanceof Error ? e.message : '网络错误'}），请稍后重试；已保留原有内容。`,
+    )
+  }
+}
+
 function openDetail(n: NewsItem) {
   selected.value = n
   dialogVisible.value = true
+}
+
+function openSource(url?: string) {
+  if (url) window.open(url, '_blank', 'noopener')
 }
 
 function impactTagType(impact: string): 'danger' | 'success' | 'info' {
@@ -113,6 +277,81 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
   font-size: 12px;
   font-weight: 400;
   color: #909399;
+}
+.live-section {
+  border: 1px dashed #c8a24b;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(200, 162, 75, 0.05), rgba(255, 255, 255, 0));
+}
+.live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.live-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #5f4a17;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c8a24b;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+.live-meta {
+  font-size: 12px;
+  color: #909399;
+}
+.live-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.live-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.live-item:hover {
+  background-color: rgba(200, 162, 75, 0.08);
+}
+.live-item-title {
+  font-size: 13px;
+  color: #303133;
+  line-height: 1.5;
+}
+.live-item-meta {
+  font-size: 12px;
+  color: #a8abb2;
+  margin-top: 2px;
+}
+.live-empty {
+  font-size: 13px;
+  color: #a8abb2;
+  padding: 6px 0;
+}
+.curated-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #303133;
+  margin: 4px 0 12px;
 }
 .news-list {
   display: flex;
@@ -183,6 +422,9 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
   color: #303133;
   line-height: 1.9;
   text-align: justify;
+}
+.source-link {
+  margin-bottom: 8px;
 }
 .analysis-box {
   margin-top: 16px;

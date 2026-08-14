@@ -8,6 +8,7 @@ export interface NewsItem {
   content: string
   impact: '利好金价' | '利空金价' | '中性'
   analysis: string
+  link?: string
 }
 
 import raw from './news.json?raw'
