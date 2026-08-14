@@ -1,107 +1,69 @@
-# GPAFP - 黄金价格分析与预测平台
+# 黄金市场行情分析
 
-GPAFP (Gold Price Analysis & Forecast Platform) 是一个端到端的黄金价格趋势分析与预测系统。它集成了数据采集、清洗、实时监控、技术指标分析及价格预测功能，为分析师和交易员提供决策支持。
+一个**纯前端、零后端**的黄金市场行情分析站点：1970 年至今的国际金价与国内金价完整记录、影响黄金的全球重大事件时间线与详细分析、金价波动技术指标分析、黄金新闻动态。构建产物为纯静态文件，可直接在浏览器打开，也可一键部署到 GitHub Pages。
 
-## �️ 系统展示
+> 本项目 fork 自 [bzgz-tech/GPAFP](https://github.com/bzgz-tech/GPAFP)（Apache-2.0），保留其 Vue 3 界面框架，移除 Python 后端并做静态化改造。
 
-### 仪表盘 (Dashboard)
-实时监控金价走势、日涨跌幅及系统运行状态。
-![Dashboard](docs/images/dashboard.png)
+## 功能
 
-### 市场数据 (Market Data)
-查看详细的历史价格数据列表。
-![Market Data](docs/images/market_data.png)
+| 页面 | 说明 |
+| --- | --- |
+| 行情总览 | 国际/国内金价最新价与涨跌幅卡片；1970 至今走势图（1月/6月/1年/5年/全部切换），图上标注 37 件影响金价的全球大事件，点击查看详情；事件影响统计表（前 30 日、后 30/90/365 日涨跌幅） |
+| 历史数据 | 国际日线/国内日线/全部历史(月度)三种视图；日期区间筛选、分页；区间最高/最低/平均/累计涨跌幅统计 |
+| 波动分析 | 收盘价 + MA20/60/120 均线叠加图、回撤子图；区间总涨幅、年化收益率、年波动率、最大回撤（全部前端计算） |
+| 事件时间线 | 1971–2025 年影响黄金的 37 件全球大事件，按年份分组、类别/影响筛选，每件含背景/传导机制/金价表现/启示四段式中文分析 |
+| 黄金新闻 | 29 条人工整理的黄金快讯（美联储决议、央行购金、金价里程碑等），支持脚本更新 |
 
-### 分析与预测 (Analysis & Forecast)
-基于技术指标（RSI, MACD, MA）的深度分析及未来价格预测。
-![Analysis](docs/images/analysis.png)
+## 数据来源与覆盖范围
 
-## �🛠 技术栈
+| 数据 | 来源 | 覆盖 |
+| --- | --- | --- |
+| 国际金价（美元/盎司）日线 | [FeziweMelvin/XAUUSD-Gold-Price](https://github.com/FeziweMelvin/XAUUSD-Gold-Price)（每周自动更新） | 2004-06-11 至今 |
+| 国际金价月度（伦敦定盘价） | [datahub.io core/gold-prices](https://datahub.io/core/gold-prices) | 1970-01 至 2004-05 |
+| 国内金价（元/克，上海黄金交易所 Au99.99）日线 | [tushare](https://tushare.pro) `sge_daily` 接口（5000 积分权限） | 2004-01-02 至今 |
+| 事件库 / 新闻 | 人工整理撰写 | 1971 年至今 |
 
-### 后端 (Backend)
-- **核心框架**: FastAPI (Python 3.10+)
-- **数据库**: MySQL 8.0 + SQLAlchemy ORM
-- **任务调度**: APScheduler (数据采集与定时任务)
-- **认证安全**: OAuth2 + JWT
+> 说明：1970–2004 年国际金价仅有月度权威数据（伦敦定盘价），2004 年起为日线，这是数据本身的现实。数据均打包为 `frontend/src/data/*.json`，页面零网络请求。
 
-### 前端 (Frontend)
-- **核心框架**: Vue 3 + TypeScript + Vite
-- **UI 组件库**: Element Plus
-- **图表可视化**: ECharts 5
-- **状态管理**: Pinia
+## 本地运行
 
----
-
-## 🚀 快速开始
-
-### 1. 环境准备
-确保您的开发环境已安装以下软件：
-- Python 3.10+
-- Node.js 16+
-- MySQL 8.0+
-- Git
-
-### 2. 获取代码
 ```bash
-git clone https://github.com/bzgz-tech/GPAFP.git
-cd GPAFP
-```
-
-### 3. 数据库配置
-1. 登录 MySQL 并创建一个新的数据库（例如 `gpafp`）：
-   ```sql
-   CREATE DATABASE gpafp CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-   ```
-2. 在 `backend` 目录下创建一个 `.env` 文件，配置数据库连接信息：
-   ```ini
-   # backend/.env
-   DATABASE_URL=mysql+pymysql://root:your_password@localhost:3306/gpafp
-   SECRET_KEY=your_secret_key_here
-   ```
-
-### 4. 后端启动
-```bash
-cd backend
-
-# 创建并激活虚拟环境 (Windows)
-python -m venv .venv
-.venv\Scripts\activate
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 启动服务 (自动创建表结构)
-python -m uvicorn app.main:app --reload --port 8000
-```
-后端启动成功后，API 文档地址：http://localhost:8000/docs
-
-### 5. 前端启动
-打开一个新的终端窗口：
-```bash
+# 依赖安装与开发（浏览器打开 http://localhost:5173）
 cd frontend
-
-# 安装依赖
 npm install
-
-# 启动开发服务器
 npm run dev
+
+# 构建生产版本（产物在 frontend/dist，双击 index.html 或任意静态托管即可打开）
+npm run build
 ```
-前端页面地址：http://localhost:5173
 
----
+## 数据更新
 
-## 🔑 默认账号
-系统初始化时会自动创建默认管理员账号：
-- **用户名**: `admin`
-- **密码**: `Admin123!`
-
-## 💻 开发指南
-
-### Git 提交规范
-由于网络环境限制，推送到 GitHub 时需指定本地代理：
 ```bash
-git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 push
+# 需要 tushare token：在项目根创建 .env（已 gitignore，勿提交）
+#   TUSHARE_TOKEN=你的token
+python3 scripts/fetch_gold_data.py   # 更新金价数据（国际日线+月度+国内 Au99.99 全量）
+python3 scripts/fetch_news.py        # 更新新闻快讯（tushare news 接口需单独开通权限，
+                                     # 权限不足时会提示并保留现有内容，不影响使用）
 ```
 
-## 📄 许可证
-[MIT License](LICENSE)
+仅使用 Python 3 标准库。更新后重新 `npm run build` 生效。
+
+## 部署到 GitHub Pages
+
+1. 把本仓库推送到你自己的 GitHub 仓库（`main` 分支）。
+2. 打开仓库 **Settings → Pages**，在 *Build and deployment* 的 *Source* 中选择 **GitHub Actions**。
+3. 推送 `main` 分支即自动触发 `.github/workflows/deploy.yml` 构建并部署；也可在 **Actions** 页手动运行 *Deploy to GitHub Pages* 工作流。
+4. 部署完成后，站点地址为 `https://<你的用户名>.github.io/<仓库名>/`。
+
+> 站点使用哈希路由（`/#/events` 等），刷新与深链接在 GitHub Pages 上均正常工作。
+
+## 技术栈
+
+- Vue 3 + TypeScript + Vite 4
+- Element Plus（UI）、ECharts 5（图表）、vue-router 4
+- 数据：静态 JSON（`frontend/src/data/`），以 `?raw` 方式加载避免类型检查开销
+
+## 许可
+
+本项目的代码部分沿用上游 [Apache-2.0](LICENSE) 许可；事件库与新闻内容为人工整理，仅供学习研究，不构成投资建议。

@@ -164,8 +164,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：vite base:./（dist 无绝对路径，经 vite preview 200 验证）；路由改哈希模式兼容 GH Pages 深链接；.github/workflows/deploy.yml（checkout→node20→npm ci→build→upload-pages-artifact→deploy-pages@v4，permissions pages:write/id-token:write，无密钥）ruby YAML 校验合法；README.md 重写为中文（简介/功能/数据来源覆盖/本地运行/数据更新/GH Pages 部署步骤/许可）。"
     }
   ]
 }
