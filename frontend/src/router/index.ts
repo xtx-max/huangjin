@@ -18,6 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/pages/Analysis.vue'),
   },
   {
+    path: '/forecast',
+    name: 'Forecast',
+    component: () => import('@/pages/Forecast.vue'),
+  },
+  {
     path: '/events',
     name: 'Events',
     component: () => import('@/pages/Events.vue'),

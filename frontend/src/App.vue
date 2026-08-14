@@ -29,6 +29,10 @@
               <el-icon><DataAnalysis /></el-icon>
               <span>波动分析</span>
             </el-menu-item>
+            <el-menu-item index="/forecast">
+              <el-icon><Compass /></el-icon>
+              <span>金价预测</span>
+            </el-menu-item>
             <el-menu-item index="/events">
               <el-icon><Flag /></el-icon>
               <span>事件时间线</span>
@@ -60,6 +64,7 @@ import {
   DataAnalysis,
   Reading,
   Flag,
+  Compass,
 } from '@element-plus/icons-vue'
 
 // public/logo.svg 会被复制到产物根目录；用稳定相对路径（哈希路由下文档路径不变），
