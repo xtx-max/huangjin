@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" ref="pageRoot">
     <el-card shadow="never" class="page-card">
       <template #header>
         <div class="card-header">
@@ -20,7 +20,7 @@
       </template>
 
       <!-- 指标卡片 -->
-      <el-row :gutter="12" class="stats-row">
+      <el-row :gutter="12" class="stats-row reveal">
         <el-col :xs="12" :sm="6">
           <div class="stat-item">
             <div class="stat-label">区间总涨幅</div>
@@ -56,13 +56,13 @@
       </el-row>
 
       <!-- 价格与均线图（含事件标注） -->
-      <div ref="priceChartRef" class="chart"></div>
+      <div ref="priceChartRef" class="chart reveal"></div>
       <!-- 回撤子图 -->
-      <div ref="ddChartRef" class="chart dd-chart"></div>
+      <div ref="ddChartRef" class="chart dd-chart reveal"></div>
     </el-card>
 
     <!-- 区间事件归因 -->
-    <el-card shadow="never" class="page-card attribution-card">
+    <el-card shadow="never" class="page-card attribution-card reveal">
       <template #header>
         <div class="card-header">
           <div class="header-title">
@@ -73,7 +73,7 @@
           <span class="attribution-tip">点击行可定位图上标注并查看完整分析；1970-2004 为月度数据</span>
         </div>
       </template>
-      <el-table v-if="rangeEvents.length > 0" :data="rangeEvents" size="small" stripe>
+      <el-table v-if="rangeEvents.length > 0" :data="rangeEvents" size="small" stripe class="motion-rows">
         <el-table-column label="事件" min-width="250">
           <template #default="{ row }">
             <span class="event-link" @click="jumpToEvent(row)">{{ row.event.title }}</span>
@@ -129,10 +129,14 @@ import {
   computeEventStats,
   type EventStat,
 } from '@/utils/eventStats'
+import { usePageMotion } from '@/composables/usePageMotion'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
 const events = loadEvents()
+
+const pageRoot = ref<HTMLElement | null>(null)
+usePageMotion(pageRoot)
 
 // 国际合并序列（1970-2004 月度 + 2004 起日线）：指标与事件标注统一使用
 const merged = buildMergedIntlSeries(data)

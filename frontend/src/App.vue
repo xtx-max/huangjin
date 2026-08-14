@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" ref="appRoot">
     <el-container class="layout-container">
       <el-header class="app-header">
         <div class="left">
@@ -56,8 +56,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { gsap } from 'gsap'
+import { prefersReducedMotion } from '@/composables/usePageMotion'
 import {
   Odometer,
   TrendCharts,
@@ -73,6 +75,35 @@ const logoUrl = './logo.svg'
 
 const route = useRoute()
 const activePath = computed(() => route.path)
+
+// 头部入场动画（仅首次挂载；减少动态效果时跳过）
+const appRoot = ref<HTMLElement | null>(null)
+let headerCtx: gsap.Context | null = null
+
+onMounted(() => {
+  if (!appRoot.value || prefersReducedMotion()) return
+  headerCtx = gsap.context(() => {
+    gsap.fromTo(
+      '.app-header',
+      { y: -64, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out' },
+    )
+    gsap.fromTo(
+      '.logo',
+      { autoAlpha: 0, x: -16 },
+      { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power2.out', delay: 0.15 },
+    )
+    gsap.fromTo(
+      '.el-menu-item',
+      { autoAlpha: 0, y: -12 },
+      { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.06, ease: 'power2.out', delay: 0.25 },
+    )
+  }, appRoot.value)
+})
+
+onBeforeUnmount(() => {
+  headerCtx?.revert()
+})
 </script>
 
 <style>
@@ -154,12 +185,16 @@ html, body {
   overflow-y: auto;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.fade-enter-active {
+  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-.fade-enter-from,
+.fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
 .fade-leave-to {
   opacity: 0;
 }

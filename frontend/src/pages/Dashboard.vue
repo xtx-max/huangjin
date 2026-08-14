@@ -1,7 +1,7 @@
 <template>
-  <div class="page">
+  <div class="page" ref="pageRoot">
     <!-- 最新行情卡片 -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row :gutter="16" class="stats-row reveal">
       <el-col :xs="24" :sm="12">
         <el-card shadow="never" class="stat-card">
           <div class="stat-title">
@@ -10,7 +10,7 @@
             <el-tag size="small" type="warning" effect="plain">美元/盎司</el-tag>
           </div>
           <div class="stat-main">
-            <span class="stat-price">{{ formatPrice(intlStat.close) }}</span>
+            <span class="stat-price motion-count" :data-value="intlStat.close ?? undefined" data-decimals="2">{{ formatPrice(intlStat.close) }}</span>
             <span class="stat-change" :class="changeClass(intlStat.change)">
               {{ formatSigned(intlStat.change) }}
               <span class="stat-pct">({{ formatSigned(intlStat.changePct, 2) }}%)</span>
@@ -27,7 +27,7 @@
             <el-tag size="small" type="success" effect="plain">元/克</el-tag>
           </div>
           <div class="stat-main">
-            <span class="stat-price">{{ formatPrice(domesticStat.close) }}</span>
+            <span class="stat-price motion-count" :data-value="domesticStat.close ?? undefined" data-decimals="2">{{ formatPrice(domesticStat.close) }}</span>
             <span class="stat-change" :class="changeClass(domesticStat.change)">
               {{ formatSigned(domesticStat.change) }}
               <span class="stat-pct">({{ formatSigned(domesticStat.changePct, 2) }}%)</span>
@@ -39,7 +39,7 @@
     </el-row>
 
     <!-- 走势图（国际视图含事件标注） -->
-    <el-card shadow="never" class="chart-card">
+    <el-card shadow="never" class="chart-card reveal">
       <template #header>
         <div class="chart-header">
           <div class="chart-title">
@@ -68,7 +68,7 @@
     </el-card>
 
     <!-- 事件影响统计 -->
-    <el-card shadow="never" class="chart-card impact-card">
+    <el-card shadow="never" class="chart-card impact-card reveal">
       <template #header>
         <div class="chart-header">
           <div class="chart-title">
@@ -78,7 +78,7 @@
           </div>
         </div>
       </template>
-      <el-table :data="sortedStats" size="small" stripe>
+      <el-table :data="sortedStats" size="small" stripe class="motion-rows">
         <el-table-column label="事件" min-width="240">
           <template #default="{ row }">
             <span class="event-link" @click="jumpToEvent(row)">{{ row.event.title }}</span>
@@ -128,10 +128,14 @@ import {
   type ClosePoint,
   type EventStat,
 } from '@/utils/eventStats'
+import { usePageMotion } from '@/composables/usePageMotion'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
 const events = loadEvents()
+
+const pageRoot = ref<HTMLElement | null>(null)
+usePageMotion(pageRoot)
 
 type SeriesKey = 'intl' | 'domestic'
 type RangeKey = '1m' | '6m' | '1y' | '5y' | 'all'

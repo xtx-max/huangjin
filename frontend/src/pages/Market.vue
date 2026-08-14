@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" ref="pageRoot">
     <el-card shadow="never" class="page-card">
       <template #header>
         <div class="card-header">
@@ -29,7 +29,7 @@
       </template>
 
       <!-- 区间统计 -->
-      <el-row :gutter="12" class="stats-row">
+      <el-row :gutter="12" class="stats-row reveal">
         <el-col :xs="12" :sm="6">
           <div class="stat-item">
             <div class="stat-label">区间最高收盘价</div>
@@ -64,7 +64,7 @@
 
       <!-- 明细表格 -->
       <div v-if="pagedRows.length > 0">
-        <el-table :data="pagedRows" size="small" stripe>
+        <el-table :data="pagedRows" size="small" stripe class="motion-rows">
           <el-table-column prop="date" label="日期" width="110" />
           <el-table-column prop="open" label="开" align="right">
             <template #default="{ row }">{{ fmt(row.open) }}</template>
@@ -107,9 +107,13 @@
 import { computed, ref, watch } from 'vue'
 import { TrendCharts } from '@element-plus/icons-vue'
 import { loadGoldPrices, type PricePoint } from '@/data/goldPrices'
+import { usePageMotion } from '@/composables/usePageMotion'
 
 const data = loadGoldPrices()
 const PAGE_SIZE = 50
+
+const pageRoot = ref<HTMLElement | null>(null)
+usePageMotion(pageRoot)
 
 type ModeKey = 'intl' | 'domestic' | 'monthly'
 

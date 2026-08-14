@@ -1,15 +1,15 @@
 <template>
-  <div class="page">
+  <div class="page" ref="pageRoot">
     <el-alert
       type="warning"
       :closable="false"
       show-icon
-      class="disclaimer"
+      class="disclaimer reveal"
       title="统计预测声明"
       description="本页预测为基于历史价格的纯统计外推（线性回归 / Holt 双指数平滑），仅用于学习与演示，不构成任何投资建议。金价受宏观政策、地缘事件与央行行为影响，实际走势可能显著偏离预测区间，请勿据此交易。"
     />
 
-    <el-card shadow="never" class="page-card">
+    <el-card shadow="never" class="page-card reveal">
       <template #header>
         <div class="card-header">
           <div class="header-title">
@@ -119,9 +119,13 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import { Compass, InfoFilled } from '@element-plus/icons-vue'
 import { loadGoldPrices } from '@/data/goldPrices'
+import { usePageMotion } from '@/composables/usePageMotion'
 import { forecastSeries } from '@/utils/forecast'
 
 const data = loadGoldPrices()
+
+const pageRoot = ref<HTMLElement | null>(null)
+usePageMotion(pageRoot)
 
 type FitRange = '6m' | '1y' | '3y' | '5y'
 const fitRange = ref<FitRange>('1y')

@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" ref="pageRoot">
     <el-card shadow="never" class="page-card">
       <template #header>
         <div class="card-header">
@@ -14,7 +14,7 @@
         </div>
       </template>
 
-      <div v-if="items.length > 0" class="news-list">
+      <div v-if="items.length > 0" class="news-list motion-list">
         <div v-for="n in items" :key="n.id" class="news-item" @click="openDetail(n)">
           <div class="news-title-row">
             <span class="news-title">{{ n.title }}</span>
@@ -55,10 +55,14 @@
 import { ref } from 'vue'
 import { Reading } from '@element-plus/icons-vue'
 import { loadNews, type NewsItem } from '@/data/news'
+import { usePageMotion } from '@/composables/usePageMotion'
 
 const items = loadNews()
 const dialogVisible = ref(false)
 const selected = ref<NewsItem | null>(null)
+
+const pageRoot = ref<HTMLElement | null>(null)
+usePageMotion(pageRoot)
 
 function openDetail(n: NewsItem) {
   selected.value = n
@@ -103,11 +107,12 @@ function openDetail(n: NewsItem) {
   border-radius: 8px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .news-item:hover {
   border-color: #c8a24b;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-3px);
 }
 .news-title-row {
   display: flex;

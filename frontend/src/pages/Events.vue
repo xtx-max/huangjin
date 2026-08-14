@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" ref="pageRoot">
     <el-card shadow="never" class="page-card">
       <template #header>
         <div class="card-header">
@@ -32,7 +32,7 @@
       </template>
 
       <!-- 按年份分组的时间线 -->
-      <div v-if="years.length > 0">
+      <div v-if="years.length > 0" class="motion-timeline">
         <div v-for="year in years" :key="year" class="year-group">
           <div class="year-title">{{ year }} 年</div>
           <el-timeline class="event-timeline">
@@ -75,9 +75,13 @@
 import { computed, ref } from 'vue'
 import { Flag } from '@element-plus/icons-vue'
 import { loadEvents, type GoldEvent } from '@/data/events'
+import { usePageMotion } from '@/composables/usePageMotion'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const events = loadEvents()
+
+const pageRoot = ref<HTMLElement | null>(null)
+usePageMotion(pageRoot)
 
 const categories = [...new Set(events.map((e) => e.category))]
 const impacts: Array<GoldEvent['impact']> = ['利好金价', '利空金价', '中性']
@@ -199,11 +203,12 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
   border-radius: 8px;
   padding: 10px 14px;
   cursor: pointer;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .event-card:hover {
   border-color: #c8a24b;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-3px);
 }
 .event-title-row {
   display: flex;
