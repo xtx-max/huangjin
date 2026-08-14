@@ -50,8 +50,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：Dashboard.vue 重写。双卡片（国际/国内最新价、日涨跌额、日涨跌幅，红涨绿跌）；ECharts 折线图带范围切换(1月/6月/1年/5年/全部)与国际/国内切换；数据经 src/data/goldPrices.ts 以 ?raw+JSON.parse 载入（避免万行 JSON 字面量类型拖慢 vue-tsc）；npm run build 零错误；dev 服务器各模块 200 无 Vite 报错；dist 含数据；卡片值独立复核一致(国际3368.94 +0.51%，国内949.24 -0.68%)。"
     },
     {
       "id": "US-004",
