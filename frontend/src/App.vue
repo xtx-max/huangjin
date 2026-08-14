@@ -61,7 +61,10 @@ import {
   Reading,
   Flag,
 } from '@element-plus/icons-vue'
-import logoUrl from '@/assets/logo.svg'
+
+// public/logo.svg 会被复制到产物根目录；用稳定相对路径（哈希路由下文档路径不变），
+// 避免打包后 new URL(import.meta.url) 在单文件内联时解析错误导致 logo 404
+const logoUrl = './logo.svg'
 
 const route = useRoute()
 const activePath = computed(() => route.path)
@@ -154,5 +157,40 @@ html, body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 窄屏适配：头部两行布局，菜单可横向滑动，避免菜单项溢出屏幕 */
+@media (max-width: 768px) {
+  .app-header {
+    height: auto;
+    min-height: 64px;
+    padding: 8px 16px;
+  }
+  .left {
+    flex-wrap: wrap;
+    height: auto;
+    min-width: 0;
+    row-gap: 6px;
+  }
+  .logo {
+    margin-right: 12px;
+    font-size: 16px;
+  }
+  .nav-menu {
+    flex-basis: 100%;
+    height: 44px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-menu::-webkit-scrollbar {
+    display: none;
+  }
+  :deep(.el-menu--horizontal > .el-menu-item) {
+    height: 44px;
+    line-height: 44px;
+    flex-shrink: 0;
+  }
 }
 </style>
