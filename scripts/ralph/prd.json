@@ -116,8 +116,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：新增 /events 路由、Events.vue 与导航菜单入口(Flag图标)。按年份分组时间线(日期升序)；每条含日期/标题/类别tag/地区/影响徽章(利好=红/利空=绿/中性=灰)；类别与影响双下拉筛选即时生效；点击事件弹出对话框展示 summary+analysis 完整分析；无结果空态。npm run build 零错误；dev 各模块 200；Events 页面按路由懒加载独立 chunk 且包含事件数据。"
     },
     {
       "id": "US-008",

@@ -29,6 +29,10 @@
               <el-icon><DataAnalysis /></el-icon>
               <span>波动分析</span>
             </el-menu-item>
+            <el-menu-item index="/events">
+              <el-icon><Flag /></el-icon>
+              <span>事件时间线</span>
+            </el-menu-item>
             <el-menu-item index="/news">
               <el-icon><Reading /></el-icon>
               <span>黄金新闻</span>
@@ -55,6 +59,7 @@ import {
   TrendCharts,
   DataAnalysis,
   Reading,
+  Flag,
 } from '@element-plus/icons-vue'
 import logoUrl from '@/assets/logo.svg'
 
