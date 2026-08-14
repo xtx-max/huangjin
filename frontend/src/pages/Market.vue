@@ -297,30 +297,33 @@ function changeClass(v: number | null): string {
   margin-bottom: 16px;
 }
 .stat-item {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e8e4da;
+  border-left: 3px solid #b08a3e;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(28, 26, 21, 0.03), 0 6px 18px rgba(28, 26, 21, 0.04);
 }
 .stat-label {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .stat-value {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
   margin-top: 4px;
 }
 .stat-sub {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
   margin-top: 4px;
 }
 .up {
-  color: #f56c6c;
+  color: #c65f57;
 }
 .down {
-  color: #67c23a;
+  color: #5a9167;
 }
 .pagination-wrap {
   display: flex;

@@ -79,27 +79,27 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .detail-date {
   font-size: 13px;
-  color: #909399;
+  color: #8a877d;
 }
 .detail-region {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .detail-summary {
   margin: 12px 0;
   font-size: 14px;
-  color: #606266;
+  color: #57544c;
   line-height: 1.7;
 }
 .detail-analysis-title {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
   margin-bottom: 8px;
 }
 .detail-analysis {
   font-size: 14px;
-  color: #303133;
+  color: #2b2924;
   line-height: 1.9;
   text-align: justify;
   white-space: pre-wrap;

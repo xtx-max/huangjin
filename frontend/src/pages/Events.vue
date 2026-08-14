@@ -174,7 +174,7 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 .count {
   font-size: 12px;
   font-weight: 400;
-  color: #909399;
+  color: #8a877d;
 }
 .header-controls {
   display: flex;
@@ -191,7 +191,7 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 .year-title {
   font-size: 18px;
   font-weight: 700;
-  color: #c8a24b;
+  color: #b08a3e;
   margin: 12px 0 8px;
   padding-left: 4px;
 }
@@ -199,14 +199,14 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
   padding-left: 4px;
 }
 .event-card {
-  border: 1px solid #ebeef5;
+  border: 1px solid #e8e4da;
   border-radius: 8px;
   padding: 10px 14px;
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .event-card:hover {
-  border-color: #c8a24b;
+  border-color: #b08a3e;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transform: translateY(-3px);
 }
@@ -218,7 +218,7 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 .event-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
 }
 .event-meta {
   display: flex;
@@ -229,10 +229,10 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .event-region {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .event-summary {
   font-size: 13px;
-  color: #606266;
+  color: #57544c;
 }
 </style>

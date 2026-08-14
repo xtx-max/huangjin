@@ -152,7 +152,7 @@ html, body {
   margin-right: 24px;
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: #f3ead8;
   white-space: nowrap;
 }
 
@@ -175,7 +175,9 @@ html, body {
 }
 
 :deep(.el-menu--horizontal > .el-menu-item.is-active) {
-  background-color: var(--el-color-primary) !important;
+  background-color: transparent !important;
+  color: var(--color-menu-active-text) !important;
+  box-shadow: inset 0 -3px 0 0 var(--color-brand-gold-light);
   border-bottom: none;
 }
 

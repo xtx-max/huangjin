@@ -207,17 +207,17 @@ function renderChart() {
       series: [
         {
           name: '历史收盘', type: 'line', data: padHist(hist, allDates.length),
-          showSymbol: false, lineStyle: { width: 2, color: '#c8a24b' }, itemStyle: { color: '#c8a24b' },
+          showSymbol: false, lineStyle: { width: 2, color: '#b08a3e' }, itemStyle: { color: '#b08a3e' },
         },
         {
           name: '线性回归预测', type: 'line', data: padFut(f.reg, allDates.length),
-          showSymbol: false, lineStyle: { width: 2, type: 'dashed', color: '#409eff' },
-          itemStyle: { color: '#409eff' },
+          showSymbol: false, lineStyle: { width: 2, type: 'dashed', color: '#5b7c99' },
+          itemStyle: { color: '#5b7c99' },
         },
         {
           name: 'Holt 预测', type: 'line', data: padFut(f.holt, allDates.length),
-          showSymbol: false, lineStyle: { width: 2, type: 'dashed', color: '#9266f9' },
-          itemStyle: { color: '#9266f9' },
+          showSymbol: false, lineStyle: { width: 2, type: 'dashed', color: '#6e8b6e' },
+          itemStyle: { color: '#6e8b6e' },
         },
         {
           name: '区间下沿', type: 'line', data: padFut(f.low, allDates.length),
@@ -307,36 +307,39 @@ function changeClass(v: number | null): string {
 }
 .control-label {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .stats-row {
   margin-bottom: 16px;
 }
 .stat-item {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e8e4da;
+  border-left: 3px solid #b08a3e;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(28, 26, 21, 0.03), 0 6px 18px rgba(28, 26, 21, 0.04);
 }
 .stat-label {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .stat-value {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
   margin-top: 4px;
 }
 .stat-sub {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
   margin-top: 4px;
 }
 .up {
-  color: #f56c6c;
+  color: #c65f57;
 }
 .down {
-  color: #67c23a;
+  color: #5a9167;
 }
 .chart {
   width: 100%;
@@ -354,7 +357,7 @@ function changeClass(v: number | null): string {
   padding-left: 20px;
   line-height: 2;
   font-size: 13px;
-  color: #606266;
+  color: #57544c;
 }
 @media (max-width: 768px) {
   .chart {

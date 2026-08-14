@@ -269,12 +269,12 @@ function renderChart() {
         data: points.map((p) => p.close),
         showSymbol: false,
         smooth: false,
-        lineStyle: { width: 2, color: '#c8a24b' },
-        itemStyle: { color: '#c8a24b' },
+        lineStyle: { width: 2, color: '#b08a3e' },
+        itemStyle: { color: '#b08a3e' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(200, 162, 75, 0.25)' },
-            { offset: 1, color: 'rgba(200, 162, 75, 0.02)' },
+            { offset: 0, color: 'rgba(176, 138, 62, 0.25)' },
+            { offset: 1, color: 'rgba(176, 138, 62, 0.02)' },
           ]),
         },
       },
@@ -292,7 +292,7 @@ function renderChart() {
         symbol: 'pin',
         symbolSize: s.event.id === highlightEventId.value ? 44 : 28,
         itemStyle: {
-          color: s.event.id === highlightEventId.value ? '#f56c6c' : '#8a6d1f',
+          color: s.event.id === highlightEventId.value ? '#c65f57' : '#8a6d1f',
         },
         label: { show: false },
       }))
@@ -363,7 +363,7 @@ function changeClass(v: number | null): string {
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #606266;
+  color: #57544c;
 }
 .stat-main {
   display: flex;
@@ -374,7 +374,7 @@ function changeClass(v: number | null): string {
 .stat-price {
   font-size: 32px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
 }
 .stat-change {
   font-size: 16px;
@@ -385,15 +385,15 @@ function changeClass(v: number | null): string {
   opacity: 0.85;
 }
 .up {
-  color: #f56c6c;
+  color: #c65f57;
 }
 .down {
-  color: #67c23a;
+  color: #5a9167;
 }
 .stat-date {
   margin-top: 6px;
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .chart-card {
   border: none;
@@ -415,7 +415,7 @@ function changeClass(v: number | null): string {
   gap: 6px;
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
   flex-wrap: wrap;
 }
 .chart-controls {
@@ -431,16 +431,16 @@ function changeClass(v: number | null): string {
 .impact-tip {
   font-size: 12px;
   font-weight: 400;
-  color: #909399;
+  color: #8a877d;
 }
 .event-link {
-  color: #409eff;
+  color: #5b7c99;
   cursor: pointer;
   font-weight: 500;
 }
 .event-date-sub {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 @media (max-width: 768px) {
   .chart {

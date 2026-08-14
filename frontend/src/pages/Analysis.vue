@@ -329,20 +329,20 @@ function renderCharts() {
     series: [
       {
         name: '收盘价', type: 'line', data: a.points.map((p) => p.close),
-        showSymbol: false, lineStyle: { width: 2, color: '#c8a24b' },
-        itemStyle: { color: '#c8a24b' },
+        showSymbol: false, lineStyle: { width: 2, color: '#b08a3e' },
+        itemStyle: { color: '#b08a3e' },
       },
       {
         name: 'MA20', type: 'line', data: a.ma20, showSymbol: false,
-        lineStyle: { width: 1.2, color: '#409eff' }, itemStyle: { color: '#409eff' },
+        lineStyle: { width: 1.2, color: '#5b7c99' }, itemStyle: { color: '#5b7c99' },
       },
       {
         name: 'MA60', type: 'line', data: a.ma60, showSymbol: false,
-        lineStyle: { width: 1.2, color: '#f56c6c' }, itemStyle: { color: '#f56c6c' },
+        lineStyle: { width: 1.2, color: '#c65f57' }, itemStyle: { color: '#c65f57' },
       },
       {
         name: 'MA120', type: 'line', data: a.ma120, showSymbol: false,
-        lineStyle: { width: 1.2, color: '#9266f9' }, itemStyle: { color: '#9266f9' },
+        lineStyle: { width: 1.2, color: '#6e8b6e' }, itemStyle: { color: '#6e8b6e' },
       },
     ],
   }
@@ -357,7 +357,7 @@ function renderCharts() {
       symbol: 'pin',
       symbolSize: s.event.id === highlightEventId.value ? 44 : 28,
       itemStyle: {
-        color: s.event.id === highlightEventId.value ? '#f56c6c' : '#8a6d1f',
+        color: s.event.id === highlightEventId.value ? '#c65f57' : '#8a6d1f',
       },
       label: { show: false },
     }))
@@ -388,7 +388,7 @@ function renderCharts() {
       series: [
         {
           name: '回撤', type: 'line', data: a.ddPct, showSymbol: false,
-          lineStyle: { width: 1.2, color: '#f56c6c' }, itemStyle: { color: '#f56c6c' },
+          lineStyle: { width: 1.2, color: '#c65f57' }, itemStyle: { color: '#c65f57' },
           areaStyle: { color: 'rgba(245, 108, 108, 0.15)' },
         },
       ],
@@ -472,40 +472,43 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 .count {
   font-size: 12px;
   font-weight: 400;
-  color: #909399;
+  color: #8a877d;
 }
 .attribution-tip {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .stats-row {
   margin-bottom: 16px;
 }
 .stat-item {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e8e4da;
+  border-left: 3px solid #b08a3e;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(28, 26, 21, 0.03), 0 6px 18px rgba(28, 26, 21, 0.04);
 }
 .stat-label {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .stat-value {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: #2b2924;
   margin-top: 4px;
 }
 .stat-sub {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
   margin-top: 4px;
 }
 .up {
-  color: #f56c6c;
+  color: #c65f57;
 }
 .down {
-  color: #67c23a;
+  color: #5a9167;
 }
 .chart {
   width: 100%;
@@ -516,17 +519,17 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
   height: 220px;
 }
 .event-link {
-  color: #409eff;
+  color: #5b7c99;
   cursor: pointer;
   font-weight: 500;
 }
 .event-date-sub {
   font-size: 12px;
-  color: #909399;
+  color: #8a877d;
 }
 .event-summary {
   font-size: 12px;
-  color: #606266;
+  color: #57544c;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
