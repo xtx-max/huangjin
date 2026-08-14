@@ -133,8 +133,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：Dashboard 国际金价图升级为月度+日线合并序列(1970至今)，ECharts markPoint 标注全部37件事件(悬浮显示标题+日期+收盘价，点击打开详情)；新增事件影响统计表(前30/后30/后90/后365日涨跌幅，按|后30日|降序，点击行跳到图上标注并高亮+打开详情)；抽取共享组件 EventDetailDialog.vue 供 Events/Dashboard 复用。雷曼2008-09-15后365日+27.8%为正✓；37/37事件有基线；抽查2020-03-19后30日+15.0%、2016脱欧后365日-5.4%均与史实一致；npm run build 零错误。"
     },
     {
       "id": "US-009",

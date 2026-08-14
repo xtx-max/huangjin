@@ -38,13 +38,16 @@
       </el-col>
     </el-row>
 
-    <!-- 走势图 -->
+    <!-- 走势图（国际视图含事件标注） -->
     <el-card shadow="never" class="chart-card">
       <template #header>
         <div class="chart-header">
           <div class="chart-title">
             <el-icon><TrendCharts /></el-icon>
             <span>金价走势</span>
+            <el-tag v-if="series === 'intl'" size="small" type="info" effect="plain">
+              ▲ 标记为影响黄金的重大事件，点击查看详情
+            </el-tag>
           </div>
           <div class="chart-controls">
             <el-radio-group v-model="series" size="small">
@@ -63,16 +66,66 @@
       </template>
       <div ref="chartRef" class="chart"></div>
     </el-card>
+
+    <!-- 事件影响统计 -->
+    <el-card shadow="never" class="chart-card impact-card">
+      <template #header>
+        <div class="chart-header">
+          <div class="chart-title">
+            <el-icon><Flag /></el-icon>
+            <span>事件影响统计</span>
+            <span class="impact-tip">点击行定位图上事件标注（按 |后30日| 排序）</span>
+          </div>
+        </div>
+      </template>
+      <el-table :data="sortedStats" size="small" stripe>
+        <el-table-column label="事件" min-width="240">
+          <template #default="{ row }">
+            <span class="event-link" @click="jumpToEvent(row)">{{ row.event.title }}</span>
+            <div class="event-date-sub">{{ row.event.date }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="前30日" align="right" width="100">
+          <template #default="{ row }">
+            <span v-if="row.pre30 === null">--</span>
+            <span v-else :class="changeClass(row.pre30)">{{ formatSigned(row.pre30, 1) }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="后30日" align="right" width="100">
+          <template #default="{ row }">
+            <span v-if="row.post30 === null">--</span>
+            <span v-else :class="changeClass(row.post30)">{{ formatSigned(row.post30, 1) }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="后90日" align="right" width="100">
+          <template #default="{ row }">
+            <span v-if="row.post90 === null">--</span>
+            <span v-else :class="changeClass(row.post90)">{{ formatSigned(row.post90, 1) }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="后365日" align="right" width="100">
+          <template #default="{ row }">
+            <span v-if="row.post365 === null">--</span>
+            <span v-else :class="changeClass(row.post365)">{{ formatSigned(row.post365, 1) }}%</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <EventDetailDialog v-model="detailVisible" :event="selectedEvent" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
-import { Coin, TrendCharts } from '@element-plus/icons-vue'
+import { Coin, Flag, TrendCharts } from '@element-plus/icons-vue'
 import { loadGoldPrices, type PricePoint } from '@/data/goldPrices'
+import { loadEvents, type GoldEvent } from '@/data/events'
+import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
+const events = loadEvents()
 
 type SeriesKey = 'intl' | 'domestic'
 type RangeKey = '1m' | '6m' | '1y' | '5y' | 'all'
@@ -101,6 +154,26 @@ function computeStat(points: PricePoint[]): Stat {
 const intlStat = computed(() => computeStat(data.internationalDaily))
 const domesticStat = computed(() => computeStat(data.domestic))
 
+/** 国际合并序列：1970-2004 月度 + 2004-06 起日线，用于走势图与事件标注 */
+interface ClosePoint {
+  date: string
+  close: number
+}
+const mergedIntl: ClosePoint[] = (() => {
+  const monthly: ClosePoint[] = data.internationalMonthly.map((m) => ({
+    date: m.date,
+    close: m.price,
+  }))
+  const daily: ClosePoint[] = data.internationalDaily.map((p) => ({
+    date: p.date,
+    close: p.close,
+  }))
+  const map = new Map<string, ClosePoint>()
+  for (const p of monthly) map.set(p.date, p)
+  for (const p of daily) map.set(p.date, p)
+  return [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
+})()
+
 const RANGE_DAYS: Record<RangeKey, number | null> = {
   '1m': 30,
   '6m': 180,
@@ -109,11 +182,12 @@ const RANGE_DAYS: Record<RangeKey, number | null> = {
   all: null,
 }
 
-const currentSeries = computed<PricePoint[]>(() =>
-  series.value === 'intl' ? data.internationalDaily : data.domestic,
-)
+const currentSeries = computed<ClosePoint[]>(() => {
+  if (series.value === 'intl') return mergedIntl
+  return data.domestic.map((p) => ({ date: p.date, close: p.close }))
+})
 
-const filtered = computed<PricePoint[]>(() => {
+const filtered = computed<ClosePoint[]>(() => {
   const points = currentSeries.value
   const days = RANGE_DAYS[range.value]
   if (days === null || points.length === 0) return points
@@ -127,61 +201,192 @@ const filtered = computed<PricePoint[]>(() => {
 const unit = computed(() => (series.value === 'intl' ? '美元/盎司' : '元/克'))
 const seriesName = computed(() => (series.value === 'intl' ? '国际金价' : '国内金价'))
 
-// ---- ECharts ----
+// ---- 事件涨跌幅统计 ----
+function addDays(iso: string, days: number): string {
+  const d = new Date(iso)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+function findPrev(points: ClosePoint[], target: string): ClosePoint | null {
+  let lo = 0
+  let hi = points.length - 1
+  let ans: ClosePoint | null = null
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if (points[mid].date <= target) {
+      ans = points[mid]
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  return ans
+}
+
+function findNext(points: ClosePoint[], target: string): ClosePoint | null {
+  let lo = 0
+  let hi = points.length - 1
+  let ans: ClosePoint | null = null
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if (points[mid].date >= target) {
+      ans = points[mid]
+      hi = mid - 1
+    } else {
+      lo = mid + 1
+    }
+  }
+  return ans
+}
+
+interface EventStat {
+  event: GoldEvent
+  baselineDate: string | null
+  baseline: number | null
+  pre30: number | null
+  post30: number | null
+  post90: number | null
+  post365: number | null
+}
+
+function pct(base: number, other: number): number {
+  return base !== 0 ? ((other - base) / base) * 100 : 0
+}
+
+const eventStats = computed<EventStat[]>(() =>
+  events.map((ev) => {
+    const basePt = findNext(mergedIntl, ev.date)
+    const prePt = findPrev(mergedIntl, addDays(ev.date, -30))
+    const post30Pt = findNext(mergedIntl, addDays(ev.date, 30))
+    const post90Pt = findNext(mergedIntl, addDays(ev.date, 90))
+    const post365Pt = findNext(mergedIntl, addDays(ev.date, 365))
+    const baseline = basePt ? basePt.close : null
+    return {
+      event: ev,
+      baselineDate: basePt ? basePt.date : null,
+      baseline,
+      pre30: baseline !== null && prePt ? pct(prePt.close, baseline) : null,
+      post30: baseline !== null && post30Pt ? pct(baseline, post30Pt.close) : null,
+      post90: baseline !== null && post90Pt ? pct(baseline, post90Pt.close) : null,
+      post365: baseline !== null && post365Pt ? pct(baseline, post365Pt.close) : null,
+    }
+  }),
+)
+
+const sortedStats = computed<EventStat[]>(() => {
+  const list = [...eventStats.value]
+  list.sort((a, b) => {
+    const va = a.post30 === null ? -1 : Math.abs(a.post30)
+    const vb = b.post30 === null ? -1 : Math.abs(b.post30)
+    return vb - va
+  })
+  return list
+})
+
+// ---- 图表 ----
 const chartRef = ref<HTMLDivElement | null>(null)
 let chart: echarts.ECharts | null = null
+let clickBound = false
+const highlightEventId = ref<string>('')
+
+const detailVisible = ref(false)
+const selectedEvent = ref<GoldEvent | null>(null)
+
+function openDetail(ev: GoldEvent) {
+  selectedEvent.value = ev
+  detailVisible.value = true
+}
+
+function jumpToEvent(row: EventStat) {
+  highlightEventId.value = row.event.id
+  series.value = 'intl'
+  range.value = 'all'
+  openDetail(row.event)
+  if (chartRef.value) {
+    chartRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 
 function renderChart() {
   if (!chartRef.value) return
   if (!chart) {
     chart = echarts.init(chartRef.value)
+    if (!clickBound) {
+      chart.on('click', (params: echarts.ECElementEvent) => {
+        if (params.componentType === 'markPoint' && params.data) {
+          const d = params.data as { value?: string }
+          const ev = events.find((e) => e.title === d.value)
+          if (ev) openDetail(ev)
+        }
+      })
+      clickBound = true
+    }
   }
   const points = filtered.value
   if (points.length === 0) {
     chart.clear()
     return
   }
-  chart.setOption(
-    {
-      grid: { left: 60, right: 24, top: 24, bottom: 48 },
-      tooltip: {
-        trigger: 'axis',
-        formatter: (params: unknown) => {
-          const list = params as Array<{ axisValue: string; data: number }>
-          const p = list[0]
-          return `${p.axisValue}<br/>${seriesName.value}：${p.data.toFixed(2)} ${unit.value}`
-        },
+  const dates = points.map((p) => p.date)
+  const option: echarts.EChartsOption = {
+    grid: { left: 60, right: 24, top: 24, bottom: 48 },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: unknown) => {
+        const list = params as Array<{ axisValue: string; data: number }>
+        const p = list[0]
+        return `${p.axisValue}<br/>${seriesName.value}：${p.data.toFixed(2)} ${unit.value}`
       },
-      xAxis: {
-        type: 'category',
-        data: points.map((p) => p.date),
-        boundaryGap: false,
-      },
-      yAxis: {
-        type: 'value',
-        scale: true,
-        name: unit.value,
-      },
-      series: [
-        {
-          name: seriesName.value,
-          type: 'line',
-          data: points.map((p) => p.close),
-          showSymbol: false,
-          smooth: false,
-          lineStyle: { width: 2, color: '#c8a24b' },
-          itemStyle: { color: '#c8a24b' },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(200, 162, 75, 0.25)' },
-              { offset: 1, color: 'rgba(200, 162, 75, 0.02)' },
-            ]),
-          },
-        },
-      ],
     },
-    { notMerge: true },
-  )
+    xAxis: { type: 'category', data: dates, boundaryGap: false },
+    yAxis: { type: 'value', scale: true, name: unit.value },
+    series: [
+      {
+        name: seriesName.value,
+        type: 'line',
+        data: points.map((p) => p.close),
+        showSymbol: false,
+        smooth: false,
+        lineStyle: { width: 2, color: '#c8a24b' },
+        itemStyle: { color: '#c8a24b' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(200, 162, 75, 0.25)' },
+            { offset: 1, color: 'rgba(200, 162, 75, 0.02)' },
+          ]),
+        },
+      },
+    ],
+  }
+  // 国际视图叠加事件标注
+  if (series.value === 'intl') {
+    const inRange = new Set(dates)
+    const markers = eventStats.value
+      .filter((s) => s.baselineDate !== null && inRange.has(s.baselineDate) && s.baseline !== null)
+      .map((s) => ({
+        name: s.event.title,
+        coord: [s.baselineDate as string, s.baseline as number],
+        value: s.event.title,
+        symbol: 'pin',
+        symbolSize: s.event.id === highlightEventId.value ? 44 : 28,
+        itemStyle: {
+          color: s.event.id === highlightEventId.value ? '#f56c6c' : '#8a6d1f',
+        },
+        label: { show: false },
+      }))
+    ;(option.series as echarts.LineSeriesOption[])[0].markPoint = {
+      data: markers,
+      label: { show: false },
+      tooltip: {
+        formatter: (p: unknown) => {
+          const d = p as { data: { value: string; coord: [string, number] } }
+          return `${d.data.value}<br/>${d.data.coord[0]} 收盘 ${d.data.coord[1].toFixed(2)} 美元/盎司`
+        },
+      },
+    }
+  }
+  chart.setOption(option, { notMerge: true })
 }
 
 function handleResize() {
@@ -193,7 +398,7 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
 })
 
-watch([series, range], () => {
+watch([series, range, highlightEventId], () => {
   renderChart()
 })
 
@@ -213,7 +418,6 @@ function formatSigned(v: number | null, digits = 2): string {
   return `${v > 0 ? '+' : ''}${v.toFixed(digits)}`
 }
 
-// 国内习惯：红涨绿跌
 function changeClass(v: number | null): string {
   if (v === null) return ''
   if (v > 0) return 'up'
@@ -274,6 +478,9 @@ function changeClass(v: number | null): string {
   border: none;
   border-radius: 8px;
 }
+.impact-card {
+  margin-top: 16px;
+}
 .chart-header {
   display: flex;
   align-items: center;
@@ -288,6 +495,7 @@ function changeClass(v: number | null): string {
   font-size: 15px;
   font-weight: 600;
   color: #303133;
+  flex-wrap: wrap;
 }
 .chart-controls {
   display: flex;
@@ -298,6 +506,20 @@ function changeClass(v: number | null): string {
 .chart {
   width: 100%;
   height: 420px;
+}
+.impact-tip {
+  font-size: 12px;
+  font-weight: 400;
+  color: #909399;
+}
+.event-link {
+  color: #409eff;
+  cursor: pointer;
+  font-weight: 500;
+}
+.event-date-sub {
+  font-size: 12px;
+  color: #909399;
 }
 @media (max-width: 768px) {
   .chart {

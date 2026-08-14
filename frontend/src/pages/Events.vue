@@ -65,33 +65,8 @@
       </div>
       <el-empty v-else description="没有符合筛选条件的事件" />
 
-      <!-- 详情对话框 -->
-      <el-dialog
-        v-model="dialogVisible"
-        :title="selected?.title ?? ''"
-        width="640px"
-        top="8vh"
-        class="event-dialog"
-      >
-        <template v-if="selected">
-          <div class="detail-meta">
-            <span class="detail-date">{{ selected.date }}</span>
-            <el-tag size="small" :type="categoryTagType(selected.category)" effect="plain">
-              {{ selected.category }}
-            </el-tag>
-            <el-tag size="small" :type="impactTagType(selected.impact)" effect="dark">
-              {{ selected.impact }}
-            </el-tag>
-            <span class="detail-region">{{ selected.region }}</span>
-          </div>
-          <p class="detail-summary">{{ selected.summary }}</p>
-          <div class="detail-analysis-title">详细分析</div>
-          <p class="detail-analysis">{{ selected.analysis }}</p>
-        </template>
-        <template #footer>
-          <el-button @click="dialogVisible = false">关闭</el-button>
-        </template>
-      </el-dialog>
+      <!-- 详情对话框（共享组件） -->
+      <EventDetailDialog v-model="dialogVisible" :event="selected" />
     </el-card>
   </div>
 </template>
@@ -100,6 +75,7 @@
 import { computed, ref } from 'vue'
 import { Flag } from '@element-plus/icons-vue'
 import { loadEvents, type GoldEvent } from '@/data/events'
+import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const events = loadEvents()
 
@@ -253,38 +229,5 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 .event-summary {
   font-size: 13px;
   color: #606266;
-}
-.detail-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.detail-date {
-  font-size: 13px;
-  color: #909399;
-}
-.detail-region {
-  font-size: 12px;
-  color: #909399;
-}
-.detail-summary {
-  margin: 12px 0;
-  font-size: 14px;
-  color: #606266;
-  line-height: 1.7;
-}
-.detail-analysis-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 8px;
-}
-.detail-analysis {
-  font-size: 14px;
-  color: #303133;
-  line-height: 1.9;
-  text-align: justify;
-  white-space: pre-wrap;
 }
 </style>
