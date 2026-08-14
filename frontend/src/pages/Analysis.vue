@@ -7,6 +7,7 @@
             <el-icon><DataAnalysis /></el-icon>
             <span>金价波动分析</span>
             <el-tag size="small" type="warning" effect="plain">国际金价 XAU/USD</el-tag>
+            <el-tag size="small" type="info" effect="plain">▲ 图上标记为区间内重大事件</el-tag>
           </div>
           <el-radio-group v-model="range" size="small">
             <el-radio-button label="1y">近1年</el-radio-button>
@@ -54,21 +55,88 @@
         </el-col>
       </el-row>
 
-      <!-- 价格与均线图 -->
+      <!-- 价格与均线图（含事件标注） -->
       <div ref="priceChartRef" class="chart"></div>
       <!-- 回撤子图 -->
       <div ref="ddChartRef" class="chart dd-chart"></div>
     </el-card>
+
+    <!-- 区间事件归因 -->
+    <el-card shadow="never" class="page-card attribution-card">
+      <template #header>
+        <div class="card-header">
+          <div class="header-title">
+            <el-icon><Flag /></el-icon>
+            <span>区间事件归因</span>
+            <span class="count">本区间内 {{ rangeEvents.length }} 件影响金价的事件</span>
+          </div>
+          <span class="attribution-tip">点击行可定位图上标注并查看完整分析；1970-2004 为月度数据</span>
+        </div>
+      </template>
+      <el-table v-if="rangeEvents.length > 0" :data="rangeEvents" size="small" stripe>
+        <el-table-column label="事件" min-width="250">
+          <template #default="{ row }">
+            <span class="event-link" @click="jumpToEvent(row)">{{ row.event.title }}</span>
+            <div class="event-date-sub">{{ row.event.date }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="影响" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag size="small" :type="impactTagType(row.event.impact)" effect="dark">
+              {{ row.event.impact }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="后30日" width="100" align="right">
+          <template #default="{ row }">
+            <span v-if="row.post30 === null">--</span>
+            <span v-else :class="changeClass(row.post30)">{{ formatSigned(row.post30, 1) }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="后90日" width="100" align="right">
+          <template #default="{ row }">
+            <span v-if="row.post90 === null">--</span>
+            <span v-else :class="changeClass(row.post90)">{{ formatSigned(row.post90, 1) }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="后365日" width="100" align="right">
+          <template #default="{ row }">
+            <span v-if="row.post365 === null">--</span>
+            <span v-else :class="changeClass(row.post365)">{{ formatSigned(row.post365, 1) }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="事件摘要" min-width="200">
+          <template #default="{ row }">
+            <span class="event-summary">{{ row.event.summary }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-empty v-else description="所选区间内没有记录在库的重大事件" />
+    </el-card>
+
+    <EventDetailDialog v-model="detailVisible" :event="selectedEvent" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
-import { DataAnalysis } from '@element-plus/icons-vue'
-import { loadGoldPrices, type PricePoint } from '@/data/goldPrices'
+import { DataAnalysis, Flag } from '@element-plus/icons-vue'
+import { loadGoldPrices } from '@/data/goldPrices'
+import { loadEvents, type GoldEvent } from '@/data/events'
+import {
+  buildMergedIntlSeries,
+  computeEventStats,
+  type EventStat,
+} from '@/utils/eventStats'
+import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
+const events = loadEvents()
+
+// 国际合并序列（1970-2004 月度 + 2004 起日线）：指标与事件标注统一使用
+const merged = buildMergedIntlSeries(data)
+const eventStats = computed(() => computeEventStats(events, merged))
 
 type RangeKey = '1y' | '5y' | '10y' | '20y' | 'all'
 const range = ref<RangeKey>('20y')
@@ -80,12 +148,6 @@ const RANGE_DAYS: Record<RangeKey, number | null> = {
   '20y': 7300,
   all: null,
 }
-
-const rangeText = computed(() => {
-  const a = analysis.value
-  if (!a.firstDate || !a.lastDate) return '--'
-  return `${a.firstDate} ~ ${a.lastDate}（${a.points.length} 个交易日）`
-})
 
 function movingAverage(closes: number[], n: number): (number | null)[] {
   const out: (number | null)[] = new Array(closes.length).fill(null)
@@ -99,7 +161,7 @@ function movingAverage(closes: number[], n: number): (number | null)[] {
 }
 
 interface Analysis {
-  points: PricePoint[]
+  points: { date: string; close: number }[]
   ma20: (number | null)[]
   ma60: (number | null)[]
   ma120: (number | null)[]
@@ -119,23 +181,26 @@ const EMPTY_ANALYSIS: Analysis = {
   maxDrawdown: null, maxDrawdownDate: '', firstDate: '', lastDate: '',
 }
 
+const rangeText = computed(() => {
+  const a = analysis.value
+  if (!a.firstDate || !a.lastDate) return '--'
+  return `${a.firstDate} ~ ${a.lastDate}（${a.points.length} 个数据点）`
+})
+
 const analysis = computed<Analysis>(() => {
-  const all = data.internationalDaily
-  if (!all || all.length === 0) return EMPTY_ANALYSIS
+  let points = merged
   const days = RANGE_DAYS[range.value]
-  let points = all
-  if (days !== null) {
-    const lastDate = all[all.length - 1].date
+  if (days !== null && points.length > 0) {
+    const lastDate = points[points.length - 1].date
     const cutoff = new Date(lastDate)
     cutoff.setDate(cutoff.getDate() - days)
     const cutoffStr = cutoff.toISOString().slice(0, 10)
-    points = all.filter((p) => p.date >= cutoffStr)
+    points = points.filter((p) => p.date >= cutoffStr)
   }
   if (points.length === 0) return EMPTY_ANALYSIS
 
   const closes = points.map((p) => p.close)
 
-  // 日收益率与回撤
   const returns: number[] = []
   let cumMax = closes[0]
   let minDD = 0
@@ -152,7 +217,6 @@ const analysis = computed<Analysis>(() => {
     }
   }
 
-  // 年波动率：日收益率标准差(样本) × √252
   let volatility: number | null = null
   if (returns.length > 1) {
     const mean = returns.reduce((s, r) => s + r, 0) / returns.length
@@ -161,10 +225,10 @@ const analysis = computed<Analysis>(() => {
     volatility = Math.sqrt(variance) * Math.sqrt(252) * 100
   }
 
-  // 年化收益率：(末/首)^(252/区间交易日) - 1
   let annualized: number | null = null
   if (closes.length > 1 && closes[0] > 0) {
-    annualized = (Math.pow(closes[closes.length - 1] / closes[0], 252 / (closes.length - 1)) - 1) * 100
+    annualized =
+      (Math.pow(closes[closes.length - 1] / closes[0], 252 / (closes.length - 1)) - 1) * 100
   }
 
   const totalChange =
@@ -186,16 +250,55 @@ const analysis = computed<Analysis>(() => {
   }
 })
 
+// ---- 区间事件归因 ----
+const rangeEvents = computed<EventStat[]>(() => {
+  const a = analysis.value
+  if (!a.firstDate) return []
+  return eventStats.value.filter(
+    (s) => s.baselineDate !== null && s.baselineDate >= a.firstDate && s.baselineDate <= a.lastDate,
+  )
+})
+
+const detailVisible = ref(false)
+const selectedEvent = ref<GoldEvent | null>(null)
+const highlightEventId = ref('')
+
+function openDetail(ev: GoldEvent) {
+  selectedEvent.value = ev
+  detailVisible.value = true
+}
+
+function jumpToEvent(row: EventStat) {
+  highlightEventId.value = row.event.id
+  openDetail(row.event)
+  if (priceChartRef.value) {
+    priceChartRef.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
 // ---- 图表 ----
 const priceChartRef = ref<HTMLDivElement | null>(null)
 const ddChartRef = ref<HTMLDivElement | null>(null)
 let priceChart: echarts.ECharts | null = null
 let ddChart: echarts.ECharts | null = null
+let clickBound = false
 
 function renderCharts() {
   const a = analysis.value
   if (!priceChartRef.value || !ddChartRef.value) return
-  if (!priceChart) priceChart = echarts.init(priceChartRef.value)
+  if (!priceChart) {
+    priceChart = echarts.init(priceChartRef.value)
+    if (!clickBound) {
+      priceChart.on('click', (params: echarts.ECElementEvent) => {
+        if (params.componentType === 'markPoint' && params.data) {
+          const d = params.data as { value?: string }
+          const ev = events.find((e) => e.title === d.value)
+          if (ev) openDetail(ev)
+        }
+      })
+      clickBound = true
+    }
+  }
   if (!ddChart) ddChart = echarts.init(ddChartRef.value)
 
   if (a.points.length === 0) {
@@ -204,44 +307,67 @@ function renderCharts() {
     return
   }
   const dates = a.points.map((p) => p.date)
-  priceChart.setOption(
-    {
-      grid: { left: 60, right: 24, top: 40, bottom: 44 },
-      legend: { data: ['收盘价', 'MA20', 'MA60', 'MA120'], top: 4 },
-      tooltip: {
-        trigger: 'axis',
-        formatter: (params: unknown) => {
-          const list = params as Array<{ seriesName: string; axisValue: string; data: number | null }>
-          const lines = list
-            .filter((p) => p.data !== null)
-            .map((p) => `${p.seriesName}：${p.data!.toFixed(2)}`)
-          return `${list[0]?.axisValue ?? ''}<br/>${lines.join('<br/>')}`
-        },
+  const priceOption: echarts.EChartsOption = {
+    grid: { left: 60, right: 24, top: 40, bottom: 44 },
+    legend: { data: ['收盘价', 'MA20', 'MA60', 'MA120'], top: 4 },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: unknown) => {
+        const list = params as Array<{ seriesName: string; axisValue: string; data: number | null }>
+        const lines = list
+          .filter((p) => p.data !== null)
+          .map((p) => `${p.seriesName}：${p.data!.toFixed(2)}`)
+        return `${list[0]?.axisValue ?? ''}<br/>${lines.join('<br/>')}`
       },
-      xAxis: { type: 'category', data: dates, boundaryGap: false },
-      yAxis: { type: 'value', scale: true, name: '美元/盎司' },
-      series: [
-        {
-          name: '收盘价', type: 'line', data: a.points.map((p) => p.close),
-          showSymbol: false, lineStyle: { width: 2, color: '#c8a24b' },
-          itemStyle: { color: '#c8a24b' },
-        },
-        {
-          name: 'MA20', type: 'line', data: a.ma20, showSymbol: false,
-          lineStyle: { width: 1.2, color: '#409eff' }, itemStyle: { color: '#409eff' },
-        },
-        {
-          name: 'MA60', type: 'line', data: a.ma60, showSymbol: false,
-          lineStyle: { width: 1.2, color: '#f56c6c' }, itemStyle: { color: '#f56c6c' },
-        },
-        {
-          name: 'MA120', type: 'line', data: a.ma120, showSymbol: false,
-          lineStyle: { width: 1.2, color: '#9266f9' }, itemStyle: { color: '#9266f9' },
-        },
-      ],
     },
-    { notMerge: true },
-  )
+    xAxis: { type: 'category', data: dates, boundaryGap: false },
+    yAxis: { type: 'value', scale: true, name: '美元/盎司' },
+    series: [
+      {
+        name: '收盘价', type: 'line', data: a.points.map((p) => p.close),
+        showSymbol: false, lineStyle: { width: 2, color: '#c8a24b' },
+        itemStyle: { color: '#c8a24b' },
+      },
+      {
+        name: 'MA20', type: 'line', data: a.ma20, showSymbol: false,
+        lineStyle: { width: 1.2, color: '#409eff' }, itemStyle: { color: '#409eff' },
+      },
+      {
+        name: 'MA60', type: 'line', data: a.ma60, showSymbol: false,
+        lineStyle: { width: 1.2, color: '#f56c6c' }, itemStyle: { color: '#f56c6c' },
+      },
+      {
+        name: 'MA120', type: 'line', data: a.ma120, showSymbol: false,
+        lineStyle: { width: 1.2, color: '#9266f9' }, itemStyle: { color: '#9266f9' },
+      },
+    ],
+  }
+  // 事件标注
+  const inRange = new Set(dates)
+  const markers = eventStats.value
+    .filter((s) => s.baselineDate !== null && inRange.has(s.baselineDate) && s.baseline !== null)
+    .map((s) => ({
+      name: s.event.title,
+      coord: [s.baselineDate as string, s.baseline as number],
+      value: s.event.title,
+      symbol: 'pin',
+      symbolSize: s.event.id === highlightEventId.value ? 44 : 28,
+      itemStyle: {
+        color: s.event.id === highlightEventId.value ? '#f56c6c' : '#8a6d1f',
+      },
+      label: { show: false },
+    }))
+  ;(priceOption.series as echarts.LineSeriesOption[])[0].markPoint = {
+    data: markers,
+    label: { show: false },
+    tooltip: {
+      formatter: (p: unknown) => {
+        const d = p as { data: { value: string; coord: [string, number] } }
+        return `${d.data.value}<br/>${d.data.coord[0]} 收盘 ${d.data.coord[1].toFixed(2)} 美元/盎司`
+      },
+    },
+  }
+  priceChart.setOption(priceOption, { notMerge: true })
 
   ddChart.setOption(
     {
@@ -277,7 +403,7 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
 })
 
-watch(range, () => {
+watch([range, highlightEventId], () => {
   renderCharts()
 })
 
@@ -305,6 +431,12 @@ function changeClass(v: number | null): string {
   if (v < 0) return 'down'
   return ''
 }
+
+function impactTagType(impact: string): 'danger' | 'success' | 'info' {
+  if (impact === '利好金价') return 'danger'
+  if (impact === '利空金价') return 'success'
+  return 'info'
+}
 </script>
 
 <style scoped>
@@ -314,6 +446,9 @@ function changeClass(v: number | null): string {
 .page-card {
   border: none;
   border-radius: 8px;
+}
+.attribution-card {
+  margin-top: 16px;
 }
 .card-header {
   display: flex;
@@ -328,6 +463,16 @@ function changeClass(v: number | null): string {
   gap: 8px;
   font-weight: 600;
   font-size: 16px;
+  flex-wrap: wrap;
+}
+.count {
+  font-size: 12px;
+  font-weight: 400;
+  color: #909399;
+}
+.attribution-tip {
+  font-size: 12px;
+  color: #909399;
 }
 .stats-row {
   margin-bottom: 16px;
@@ -365,6 +510,23 @@ function changeClass(v: number | null): string {
 }
 .dd-chart {
   height: 220px;
+}
+.event-link {
+  color: #409eff;
+  cursor: pointer;
+  font-weight: 500;
+}
+.event-date-sub {
+  font-size: 12px;
+  color: #909399;
+}
+.event-summary {
+  font-size: 12px;
+  color: #606266;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 @media (max-width: 768px) {
   .chart {

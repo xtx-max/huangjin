@@ -122,6 +122,12 @@ import * as echarts from 'echarts'
 import { Coin, Flag, TrendCharts } from '@element-plus/icons-vue'
 import { loadGoldPrices, type PricePoint } from '@/data/goldPrices'
 import { loadEvents, type GoldEvent } from '@/data/events'
+import {
+  buildMergedIntlSeries,
+  computeEventStats,
+  type ClosePoint,
+  type EventStat,
+} from '@/utils/eventStats'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
@@ -154,25 +160,9 @@ function computeStat(points: PricePoint[]): Stat {
 const intlStat = computed(() => computeStat(data.internationalDaily))
 const domesticStat = computed(() => computeStat(data.domestic))
 
-/** 国际合并序列：1970-2004 月度 + 2004-06 起日线，用于走势图与事件标注 */
-interface ClosePoint {
-  date: string
-  close: number
-}
-const mergedIntl: ClosePoint[] = (() => {
-  const monthly: ClosePoint[] = data.internationalMonthly.map((m) => ({
-    date: m.date,
-    close: m.price,
-  }))
-  const daily: ClosePoint[] = data.internationalDaily.map((p) => ({
-    date: p.date,
-    close: p.close,
-  }))
-  const map = new Map<string, ClosePoint>()
-  for (const p of monthly) map.set(p.date, p)
-  for (const p of daily) map.set(p.date, p)
-  return [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
-})()
+// 国际合并序列与事件涨跌幅统计（共享工具）
+const mergedIntl = buildMergedIntlSeries(data)
+const eventStats = computed(() => computeEventStats(events, mergedIntl))
 
 const RANGE_DAYS: Record<RangeKey, number | null> = {
   '1m': 30,
@@ -200,79 +190,6 @@ const filtered = computed<ClosePoint[]>(() => {
 
 const unit = computed(() => (series.value === 'intl' ? '美元/盎司' : '元/克'))
 const seriesName = computed(() => (series.value === 'intl' ? '国际金价' : '国内金价'))
-
-// ---- 事件涨跌幅统计 ----
-function addDays(iso: string, days: number): string {
-  const d = new Date(iso)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
-function findPrev(points: ClosePoint[], target: string): ClosePoint | null {
-  let lo = 0
-  let hi = points.length - 1
-  let ans: ClosePoint | null = null
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1
-    if (points[mid].date <= target) {
-      ans = points[mid]
-      lo = mid + 1
-    } else {
-      hi = mid - 1
-    }
-  }
-  return ans
-}
-
-function findNext(points: ClosePoint[], target: string): ClosePoint | null {
-  let lo = 0
-  let hi = points.length - 1
-  let ans: ClosePoint | null = null
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1
-    if (points[mid].date >= target) {
-      ans = points[mid]
-      hi = mid - 1
-    } else {
-      lo = mid + 1
-    }
-  }
-  return ans
-}
-
-interface EventStat {
-  event: GoldEvent
-  baselineDate: string | null
-  baseline: number | null
-  pre30: number | null
-  post30: number | null
-  post90: number | null
-  post365: number | null
-}
-
-function pct(base: number, other: number): number {
-  return base !== 0 ? ((other - base) / base) * 100 : 0
-}
-
-const eventStats = computed<EventStat[]>(() =>
-  events.map((ev) => {
-    const basePt = findNext(mergedIntl, ev.date)
-    const prePt = findPrev(mergedIntl, addDays(ev.date, -30))
-    const post30Pt = findNext(mergedIntl, addDays(ev.date, 30))
-    const post90Pt = findNext(mergedIntl, addDays(ev.date, 90))
-    const post365Pt = findNext(mergedIntl, addDays(ev.date, 365))
-    const baseline = basePt ? basePt.close : null
-    return {
-      event: ev,
-      baselineDate: basePt ? basePt.date : null,
-      baseline,
-      pre30: baseline !== null && prePt ? pct(prePt.close, baseline) : null,
-      post30: baseline !== null && post30Pt ? pct(baseline, post30Pt.close) : null,
-      post90: baseline !== null && post90Pt ? pct(baseline, post90Pt.close) : null,
-      post365: baseline !== null && post365Pt ? pct(baseline, post365Pt.close) : null,
-    }
-  }),
-)
 
 const sortedStats = computed<EventStat[]>(() => {
   const list = [...eventStats.value]
