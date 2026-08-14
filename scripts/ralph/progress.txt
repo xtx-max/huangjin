@@ -17,3 +17,9 @@ Started: 2026-08-14 12:00:03 +0800
 - tushare `sge_daily`（Au99.99）：code=0 可用，数据始于 2004-01-02，单次最多 2000 行，需按日期分页。
 - tushare `sge_basic` 可用；`fut_daily` 对 SHFE.AU0 返回 0 行（不用）。
 - 国际日线数据文件 XAU_1d_data.csv（FeziweMelvin/XAUUSD-Gold-Price）覆盖 2004-06-11 至今、约 5400 行，分号分隔。
+
+## 2026-08-14 12:5x — US-001 静态化改造基座 ✅（本轮由主会话直接实现）
+- deepcode-ralph 运行器在本环境不可用（expect TTY 下 deepcode 的 bash 工具 spawn EBADF，会话卡死在提问），已弃用；后续故事由主会话按"一次一个故事"纪律直接实现并验证。
+- 变更：删除 backend/、start*.ps1/bat；删除 Login/ChangePassword/UserManagement/Feedback/Settings/Monitor 页、auth/analysis 组件、useCaptcha、services/api.ts、store、utils；vite.config 移除 /api 代理；main.ts 移除 pinia；package.json 移除 axios/pinia/vue-quill/marked；App.vue 菜单改为 行情总览/历史数据/波动分析/黄金新闻。
+- 验证：npm run build 零错误（vue-tsc）；dev 服务器根路径 HTTP 200；grep 无 axios|/api|localStorage|/login|createPinia 残留。
+- 复用经验：四个页面目前是 el-empty 占位骨架，后续故事直接填充；Element Plus 中文 locale 已配置。

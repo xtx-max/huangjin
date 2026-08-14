@@ -1,11 +1,11 @@
 <template>
   <div id="app">
-    <el-container v-if="isAuthed" class="layout-container">
+    <el-container class="layout-container">
       <el-header class="app-header">
         <div class="left">
           <div class="logo">
             <img :src="logoUrl" class="logo-icon" alt="Logo" />
-            <span class="brand">HJ分析平台</span>
+            <span class="brand">黄金市场行情分析</span>
           </div>
           <el-menu
             mode="horizontal"
@@ -19,46 +19,21 @@
           >
             <el-menu-item index="/">
               <el-icon><Odometer /></el-icon>
-              <span>仪表盘</span>
+              <span>行情总览</span>
             </el-menu-item>
             <el-menu-item index="/market">
               <el-icon><TrendCharts /></el-icon>
-              <span>市场数据</span>
+              <span>历史数据</span>
             </el-menu-item>
             <el-menu-item index="/analysis">
               <el-icon><DataAnalysis /></el-icon>
-              <span>分析与预测</span>
+              <span>波动分析</span>
             </el-menu-item>
             <el-menu-item index="/news">
               <el-icon><Reading /></el-icon>
-              <span>市场资讯</span>
-            </el-menu-item>
-            <el-menu-item index="/monitor">
-              <el-icon><Monitor /></el-icon>
-              <span>系统监控</span>
-            </el-menu-item>
-            <el-menu-item index="/feedback">
-              <el-icon><ChatDotRound /></el-icon>
-              <span>意见反馈</span>
+              <span>黄金新闻</span>
             </el-menu-item>
           </el-menu>
-        </div>
-        <div class="right">
-          <el-dropdown trigger="click" @command="handleCommand">
-            <span class="user-dropdown">
-              <el-avatar :size="32" :icon="UserFilled" class="user-avatar" />
-              <span class="username">{{ store.user?.username || '用户' }}</span>
-              <el-icon><ArrowDown /></el-icon>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="user_management" :icon="UserFilled" v-if="store.user?.is_admin">用户管理</el-dropdown-item>
-                <el-dropdown-item command="settings" :icon="Setting" v-if="store.user?.is_admin">系统设置</el-dropdown-item>
-                <el-dropdown-item command="change_password" :icon="Lock">修改密码</el-dropdown-item>
-                <el-dropdown-item divided command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
         </div>
       </el-header>
       <el-main class="app-main">
@@ -69,53 +44,22 @@
         </router-view>
       </el-main>
     </el-container>
-    <router-view v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useUserStore } from '@/store'
-import { 
-  ArrowDown, 
-  UserFilled, 
-  Setting, 
-  Lock, 
-  SwitchButton,
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import {
   Odometer,
   TrendCharts,
   DataAnalysis,
   Reading,
-  Monitor,
-  ChatDotRound
 } from '@element-plus/icons-vue'
 import logoUrl from '@/assets/logo.svg'
 
-const router = useRouter()
 const route = useRoute()
-const store = useUserStore()
-const isAuthed = computed(() => !!store.token && route.name !== 'Login')
 const activePath = computed(() => route.path)
-
-onMounted(() => {
-  if (store.token && !store.user) {
-    store.fetchUser()
-  }
-})
-
-const handleCommand = (command: string) => {
-  if (command === 'logout') {
-    store.clearToken()
-    router.push('/login')
-  } else if (command === 'user_management') {
-    router.push('/users')
-  } else if (command === 'settings') {
-    router.push('/settings')
-  } else if (command === 'change_password') {
-    router.push('/change-password')
-  }
-}
 </script>
 
 <style>
@@ -171,7 +115,6 @@ html, body {
 .logo-icon {
   width: 32px;
   height: 32px;
-  /* color: #faad14; removed as it is an img */
 }
 
 .nav-menu {
@@ -190,27 +133,6 @@ html, body {
 :deep(.el-menu--horizontal > .el-menu-item.is-active) {
   background-color: var(--el-color-primary) !important;
   border-bottom: none;
-}
-
-.right {
-  display: flex;
-  align-items: center;
-}
-
-.user-dropdown {
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.user-avatar {
-  background-color: var(--el-color-primary);
-}
-
-.username {
-  font-size: 14px;
 }
 
 .app-main {

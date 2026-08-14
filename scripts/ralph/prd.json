@@ -18,8 +18,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：删除 backend/ 与启动脚本；删除登录/用户/设置/监控/反馈页与路由守卫；删除 api.ts/axios/pinia/store 及 useCaptcha、auth/analysis 组件；vite 移除 /api 代理；npm run build 零错误；dev 服务器 5173 根路径返回 200 无登录跳转；无 axios|/api|localStorage|/login|createPinia 残留引用。"
     },
     {
       "id": "US-002",
