@@ -99,8 +99,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "完成：events.json 37 件 1971-2025 事件，按日期升序，字段齐全(id/date/title/category/region/summary/impact/analysis)，analysis 200-265 字四段式(背景/传导机制/金价表现/启示)；18 项里程碑事件全部覆盖；类别枚举 7 类、影响枚举 3 值均合法；随机抽查与史实一致；npm run build 通过。"
     },
     {
       "id": "US-007",
