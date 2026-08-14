@@ -251,6 +251,14 @@ function renderChart() {
   }
   const dates = points.map((p) => p.date)
   const option: echarts.EChartsOption = {
+    animationDuration: 900,
+
+    animationEasing: 'cubicOut',
+
+    animationDurationUpdate: 600,
+
+    animationEasingUpdate: 'cubicOut',
+
     grid: { left: 60, right: 24, top: 24, bottom: 48 },
     tooltip: {
       trigger: 'axis',
@@ -349,14 +357,14 @@ function changeClass(v: number | null): string {
 
 <style scoped>
 .page {
-  padding: 8px 0;
+  padding: 12px 0 48px;
 }
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 .stat-card {
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
 }
 .stat-title {
   display: flex;
@@ -397,10 +405,10 @@ function changeClass(v: number | null): string {
 }
 .chart-card {
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
 }
 .impact-card {
-  margin-top: 16px;
+  margin-top: 24px;
 }
 .chart-header {
   display: flex;
@@ -426,7 +434,7 @@ function changeClass(v: number | null): string {
 }
 .chart {
   width: 100%;
-  height: 420px;
+  height: 440px;
 }
 .impact-tip {
   font-size: 12px;

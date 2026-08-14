@@ -85,7 +85,7 @@ onMounted(() => {
   headerCtx = gsap.context(() => {
     gsap.fromTo(
       '.app-header',
-      { y: -64, autoAlpha: 0 },
+      { y: -56, autoAlpha: 0 },
       { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out' },
     )
     gsap.fromTo(
@@ -128,14 +128,19 @@ html, body {
 }
 
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   background-color: var(--color-header-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-  height: 64px;
+  padding: 0 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  height: 56px;
 }
 
 .left {
@@ -150,9 +155,10 @@ html, body {
   align-items: center;
   gap: 8px;
   margin-right: 24px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: #f3ead8;
+  letter-spacing: -0.01em;
+  color: #f5f5f7;
   white-space: nowrap;
 }
 
@@ -163,39 +169,43 @@ html, body {
 
 .nav-menu {
   border-bottom: none;
-  height: 64px;
+  height: 56px;
   flex: 1;
   min-width: 0;
 }
 
 :deep(.el-menu--horizontal > .el-menu-item) {
-  height: 64px;
-  line-height: 64px;
+  height: 56px;
+  line-height: 56px;
   border-bottom: none;
+  transition: color 0.3s ease, box-shadow 0.3s ease;
+}
+:deep(.el-menu--horizontal > .el-menu-item:hover) {
+  color: #ffffff !important;
 }
 
 :deep(.el-menu--horizontal > .el-menu-item.is-active) {
   background-color: transparent !important;
   color: var(--color-menu-active-text) !important;
-  box-shadow: inset 0 -3px 0 0 var(--color-brand-gold-light);
+  box-shadow: inset 0 -2px 0 0 var(--color-brand-gold-light);
   border-bottom: none;
 }
 
 .app-main {
   background-color: var(--bg-color-base);
-  padding: 24px;
+  padding: 28px 24px 72px;
   overflow-y: auto;
 }
 
 .fade-enter-active {
-  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .fade-leave-active {
-  transition: opacity 0.18s ease;
+  transition: opacity 0.2s ease;
 }
 .fade-enter-from {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(14px) scale(0.998);
 }
 .fade-leave-to {
   opacity: 0;

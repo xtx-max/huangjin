@@ -151,11 +151,11 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 
 <style scoped>
 .page {
-  padding: 8px 0;
+  padding: 12px 0 48px;
 }
 .page-card {
   border: none;
-  border-radius: 8px;
+  border-radius: 18px;
 }
 .card-header {
   display: flex;
@@ -169,7 +169,8 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 17px;
+  letter-spacing: -0.01em;
 }
 .count {
   font-size: 12px;
@@ -200,8 +201,8 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .event-card {
   border: 1px solid #e8e4da;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border-radius: 12px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }

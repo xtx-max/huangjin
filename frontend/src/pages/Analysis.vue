@@ -312,6 +312,14 @@ function renderCharts() {
   }
   const dates = a.points.map((p) => p.date)
   const priceOption: echarts.EChartsOption = {
+    animationDuration: 900,
+
+    animationEasing: 'cubicOut',
+
+    animationDurationUpdate: 600,
+
+    animationEasingUpdate: 'cubicOut',
+
     grid: { left: 60, right: 24, top: 40, bottom: 44 },
     legend: { data: ['收盘价', 'MA20', 'MA60', 'MA120'], top: 4 },
     tooltip: {
@@ -375,6 +383,14 @@ function renderCharts() {
 
   ddChart.setOption(
     {
+      animationDuration: 900,
+
+      animationEasing: 'cubicOut',
+
+      animationDurationUpdate: 600,
+
+      animationEasingUpdate: 'cubicOut',
+
       grid: { left: 60, right: 24, top: 20, bottom: 44 },
       tooltip: {
         trigger: 'axis',
@@ -445,14 +461,14 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 
 <style scoped>
 .page {
-  padding: 8px 0;
+  padding: 12px 0 48px;
 }
 .page-card {
   border: none;
-  border-radius: 8px;
+  border-radius: 18px;
 }
 .attribution-card {
-  margin-top: 16px;
+  margin-top: 24px;
 }
 .card-header {
   display: flex;
@@ -466,7 +482,8 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 17px;
+  letter-spacing: -0.01em;
   flex-wrap: wrap;
 }
 .count {
@@ -479,23 +496,23 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
   color: #8a877d;
 }
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 .stat-item {
   background: #ffffff;
-  border: 1px solid #e8e4da;
-  border-left: 3px solid #b08a3e;
-  border-radius: 10px;
-  padding: 14px 16px;
-  box-shadow: 0 1px 2px rgba(28, 26, 21, 0.03), 0 6px 18px rgba(28, 26, 21, 0.04);
+  border: none;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.05);
 }
 .stat-label {
   font-size: 12px;
   color: #8a877d;
 }
 .stat-value {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 600;
+  letter-spacing: -0.02em;
   color: #2b2924;
   margin-top: 4px;
 }

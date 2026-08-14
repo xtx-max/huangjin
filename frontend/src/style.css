@@ -1,14 +1,13 @@
 /* ==========================================================================
-   黄金市场行情分析 · 主题样式（暖中性底色 + 金色单一主色）
-   设计规范：低饱和金色强调色、无紫色/蓝色荧光、暖灰中性层次、留白呼吸感
+   黄金市场行情分析 · 主题（Apple 官网质感：苹果灰底 + 大留白 + 毛玻璃 + 金色单点缀）
    ========================================================================== */
 :root {
-  /* 品牌金 */
+  /* 品牌金（唯一强调色，低饱和） */
   --color-brand-gold: #b08a3e;
   --color-brand-gold-dark: #8a6d1f;
   --color-brand-gold-light: #d9b25f;
 
-  /* Element Plus 主题覆盖：金色主色 */
+  /* Element Plus 主色覆盖：金 */
   --el-color-primary: #b08a3e;
   --el-color-primary-light-3: #c09d58;
   --el-color-primary-light-5: #d0b480;
@@ -17,47 +16,51 @@
   --el-color-primary-light-9: #f3ead8;
   --el-color-primary-dark-2: #8a6d1f;
 
-  /* 语义色（暖调、低饱和） */
-  --el-color-success: #5a9167;
-  --el-color-warning: #c19145;
-  --el-color-danger: #c65f57;
-  --el-color-error: #c65f57;
-  --el-color-info: #8a877d;
+  /* 语义色（Apple 风格低饱和） */
+  --el-color-success: #34c759;
+  --el-color-warning: #ff9f0a;
+  --el-color-danger: #ff453a;
+  --el-color-error: #ff453a;
+  --el-color-info: #8e8e93;
 
-  /* 文本（暖灰阶） */
-  --text-color-primary: #2b2924;
-  --text-color-regular: #57544c;
-  --text-color-secondary: #8a877d;
-  --text-color-placeholder: #b3afa4;
-  --text-color-disabled: #cfcbbf;
+  /* Apple 中性色阶 */
+  --text-color-primary: #1d1d1f;
+  --text-color-regular: #3a3a3c;
+  --text-color-secondary: #6e6e73;
+  --text-color-placeholder: #aeaeb2;
+  --text-color-disabled: #c7c7cc;
 
-  /* 背景与边框 */
-  --bg-color-base: #f7f5f1;
+  --bg-color-base: #f5f5f7;
   --bg-color-card: #ffffff;
-  --bg-color-overlay: rgba(28, 26, 21, 0.5);
-  --border-color-base: #e8e4da;
-  --border-color-light: #f1eee7;
-  --border-color-dark: #d8d3c6;
+  --bg-color-overlay: rgba(29, 29, 31, 0.5);
+  --border-color-base: #e8e8ed;
+  --border-color-light: #f0f0f4;
+  --border-color-dark: #d2d2d7;
 
-  /* 头部 */
-  --color-header-bg: #1b1915;
-  --color-menu-text: rgba(255, 255, 255, 0.78);
-  --color-menu-active-text: #d9b25f;
+  /* 头部（毛玻璃深色） */
+  --color-header-bg: rgba(22, 22, 24, 0.82);
+  --color-header-solid: #161618;
+  --color-menu-text: rgba(255, 255, 255, 0.8);
+  --color-menu-active-text: #ffffff;
 
   /* Element Plus 全局细节 */
-  --el-border-color: #e8e4da;
-  --el-border-color-light: #f1eee7;
-  --el-border-color-lighter: #f5f2ec;
-  --el-bg-color-page: #f7f5f1;
-  --el-fill-color-light: #f7f5f1;
+  --el-border-color: #e8e8ed;
+  --el-border-color-light: #f0f0f4;
+  --el-border-color-lighter: #f5f5f7;
+  --el-bg-color-page: #f5f5f7;
+  --el-fill-color-light: #f5f5f7;
   --el-fill-color-blank: #ffffff;
-  --el-border-radius-base: 8px;
-  --el-box-shadow-light: 0 1px 2px rgba(28, 26, 21, 0.04), 0 8px 24px rgba(28, 26, 21, 0.05);
+  --el-border-radius-base: 10px;
+  --el-box-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.05);
 
-  /* Font Styles */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'PingFang SC',
+  /* 字体（Apple 系统栈：SF Pro + 苹方） */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
   --font-family-number: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -67,56 +70,93 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-color-base);
   color: var(--text-color-primary);
+  letter-spacing: -0.01em;
 }
 
-/* 页面内容宽度约束与呼吸感 */
+/* 页面宽度与底部留白 */
 .page {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* 数字统一等宽对齐，行情观感更专业 */
+/* 数字等宽对齐 */
 .stat-value,
 .stat-price,
 .motion-count {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+  letter-spacing: -0.02em;
 }
 
-/* Element Plus 组件细节打磨 */
+/* ---- Element Plus 组件 Apple 化 ---- */
 .el-card {
-  border-radius: 12px;
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 16px 40px rgba(0, 0, 0, 0.05);
+}
+
+.el-card__header {
+  padding: 20px 24px;
+}
+
+.el-card__body {
+  padding: 24px;
 }
 
 .el-dialog {
-  border-radius: 14px;
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
 }
 
 .el-button {
-  border-radius: 8px;
+  border-radius: 980px;
   font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.el-button:hover {
+  transform: translateY(-1px);
+}
+
+.el-button:active {
+  transform: scale(0.97);
 }
 
 .el-radio-button__inner {
-  border-radius: 6px;
+  border-radius: 980px;
+}
+
+.el-table {
+  font-size: 13px;
 }
 
 .el-table th.el-table__cell {
-  background-color: #f7f5f1;
-  color: var(--text-color-regular);
+  background-color: transparent;
+  color: var(--text-color-secondary);
   font-weight: 600;
+  font-size: 12px;
+}
+
+.el-table td.el-table__cell {
+  padding: 12px 0;
 }
 
 .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
-  background-color: #faf8f4;
+  background-color: #fafafc;
 }
 
 .el-table .el-table__body tr:hover > td.el-table__cell {
-  background-color: rgba(176, 138, 62, 0.06);
+  background-color: rgba(176, 138, 62, 0.05);
 }
 
 .el-pagination.is-background .el-pager li.is-active {
-  border-radius: 6px;
+  border-radius: 980px;
+}
+
+.el-message {
+  border-radius: 14px;
 }
 
 /* Common Typography Utilities */
@@ -133,20 +173,20 @@ body {
 /* Card Style Standard */
 .common-card {
   background: var(--bg-color-card);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(28, 26, 21, 0.04), 0 8px 24px rgba(28, 26, 21, 0.05);
-  border: 1px solid var(--border-color-base);
-  transition: box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 16px 40px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .common-card:hover {
-  box-shadow: 0 4px 10px -2px rgba(28, 26, 21, 0.08), 0 12px 32px rgba(28, 26, 21, 0.07);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 24px 56px rgba(0, 0, 0, 0.08);
 }
 
-/* Scrollbar Styling（金色点缀） */
+/* Scrollbar（极简） */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -154,12 +194,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d8d3c6;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-gold);
+  background: rgba(0, 0, 0, 0.32);
 }
 
 /* 减少动态效果偏好：禁用 CSS 动画与过渡（GSAP 动效在 JS 侧已同步跳过） */
