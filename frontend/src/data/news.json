@@ -1,6 +1,336 @@
 {
   "items": [
     {
+      "id": "news-rss-202608153842345123",
+      "title": "金价、银价、油价 都涨了",
+      "time": "2026-08-15 07:57",
+      "source": "央视财经",
+      "summary": "14日美国三大股指集体下跌美国商务部14日发布的数据显示，7月零售数据在各个层面都令人失望，美国国内消费正显现出疲软迹象…",
+      "content": "14日美国三大股指集体下跌美国商务部14日发布的数据显示，7月零售数据在各个层面都令人失望，美国国内消费正显现出疲软迹象。此外，AI板块部分公司股价出现回调也拖累市场整体表现。14日美股集体下跌。截至当天收盘，道琼斯工业平均指数比前一交易日下跌0.20%；标普500指数下跌0.17%；纳斯达克综合指数下跌0.28%。",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "http://finance.eastmoney.com/news/1351,202608153842345123.html"
+    },
+    {
+      "id": "news-rss-google-0",
+      "title": "投资者再度大举押注黄金，但白银仍是更优配置 - 新浪网",
+      "time": "2026-08-14 16:25",
+      "source": "新浪网",
+      "summary": "投资者再度大举押注黄金，但白银仍是更优配置 - 新浪网",
+      "content": "投资者再度大举押注黄金，但白银仍是更优配置 - 新浪网（原文：https://news.google.com/rss/articles/CBMihwFBVV95cUxPNEFSSWFRbzNUM2ZJX29lUFlfMXJjQ3VrQXR5eVJmMUstcmsyblJ4RDI3MnVZYlVWcE9Ka1lIVXhoTXZNUjJNQzRHTzhqU3RaWW1rQjR0Rndrc2VhSzNPYWxlT2s2SkdpVFdGZVZFc0lVeUczcWx0bThkdG95Z1NGODVaWGFNdkU?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPNEFSSWFRbzNUM2ZJX29lUFlfMXJjQ3VrQXR5eVJmMUstcmsyblJ4RDI3MnVZYlVWcE9Ka1lIVXhoTXZNUjJNQzRHTzhqU3RaWW1rQjR0Rndrc2VhSzNPYWxlT2s2SkdpVFdGZVZFc0lVeUczcWx0bThkdG95Z1NGODVaWGFNdkU?oc=5"
+    },
+    {
+      "id": "news-rss-google-1",
+      "title": "国际金价再上4400美元 金饰涨价催生消费轻量化 - 新浪财经",
+      "time": "2026-08-14 21:45",
+      "source": "新浪财经",
+      "summary": "国际金价再上4400美元 金饰涨价催生消费轻量化 - 新浪财经",
+      "content": "国际金价再上4400美元 金饰涨价催生消费轻量化 - 新浪财经（原文：https://news.google.com/rss/articles/CBMimAFBVV95cUxNZ0R3RXhxMXVFazNpMHVkVExYMVJMaWRzbWE4ckJiZElZRGdZZzdBdFA4Um5XSk1BXzltUFNkTlVnb3J2ZXBzLU1Cd1VqOTVncE5KS2M2RUItSlo5eU9WQUZHS0RXZ01HejlGTjlNWGF1a1ktR21GRGhEdEdjVURDR2ZoR1VyOTE5N3lpUEY2dWc2UjcwbUhuZw?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNZ0R3RXhxMXVFazNpMHVkVExYMVJMaWRzbWE4ckJiZElZRGdZZzdBdFA4Um5XSk1BXzltUFNkTlVnb3J2ZXBzLU1Cd1VqOTVncE5KS2M2RUItSlo5eU9WQUZHS0RXZ01HejlGTjlNWGF1a1ktR21GRGhEdEdjVURDR2ZoR1VyOTE5N3lpUEY2dWc2UjcwbUhuZw?oc=5"
+    },
+    {
+      "id": "news-rss-google-2",
+      "title": "美国经济数据疲软削弱美联储加息预期，金价走高 - 同花顺财经",
+      "time": "2026-08-14 18:42",
+      "source": "同花顺财经",
+      "summary": "美国经济数据疲软削弱美联储加息预期，金价走高 - 同花顺财经",
+      "content": "美国经济数据疲软削弱美联储加息预期，金价走高 - 同花顺财经（原文：https://news.google.com/rss/articles/CBMiXkFVX3lxTE5XeTlXMFRVSlA3S3F2ZThSakI2Y3J6dW4zRU10anc1R05PelVIUXFVbjZTWFd6cHZiOGJVSVkwbU50QWZPM2tCNnpEMWtWVnI5aGVKdW9TaWZOSDRuS2c?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5XeTlXMFRVSlA3S3F2ZThSakI2Y3J6dW4zRU10anc1R05PelVIUXFVbjZTWFd6cHZiOGJVSVkwbU50QWZPM2tCNnpEMWtWVnI5aGVKdW9TaWZOSDRuS2c?oc=5"
+    },
+    {
+      "id": "news-rss-google-3",
+      "title": "恐怖数据爆冷金价中长期上行逻辑仍稳固_金市直播 - 黄金网",
+      "time": "2026-08-14 14:45",
+      "source": "黄金网",
+      "summary": "恐怖数据爆冷金价中长期上行逻辑仍稳固_金市直播 - 黄金网",
+      "content": "恐怖数据爆冷金价中长期上行逻辑仍稳固_金市直播 - 黄金网（原文：https://news.google.com/rss/articles/CBMiaEFVX3lxTE1UX3lWX0Nld3RDb25VOXZDMWlRRlFsUDB4ZXZoVVhaeDl2Z3F0N3B5V29iSkVoZUJVdy0zNFRWVnN3T2ZtVDBVSDZobnhaVkl6di1JckgyZHN3Z3FzWkVMZU5vQ25fOGJa?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1UX3lWX0Nld3RDb25VOXZDMWlRRlFsUDB4ZXZoVVhaeDl2Z3F0N3B5V29iSkVoZUJVdy0zNFRWVnN3T2ZtVDBVSDZobnhaVkl6di1JckgyZHN3Z3FzWkVMZU5vQ25fOGJa?oc=5"
+    },
+    {
+      "id": "news-rss-google-4",
+      "title": "金价近期强势反弹，现在该不该出手？ - 经济频道",
+      "time": "2026-08-15 00:10",
+      "source": "经济频道",
+      "summary": "金价近期强势反弹，现在该不该出手？ - 经济频道",
+      "content": "金价近期强势反弹，现在该不该出手？ - 经济频道（原文：https://news.google.com/rss/articles/CBMie0FVX3lxTE9xZFQtRTZNWnVwMzF1ZFJmWmFFMzJTZmFqaGVZdURVZVRUam5fbE1Gb1F4bXMyMFdoVDRhSi1DcHM1bHczVThNX3A4VU11cUQ5aWRLYlRpQkhpT2tMSE93c1RJWlh5Sl92TGtHTzZhQV9QUzhiZTlIMWZKWQ?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE9xZFQtRTZNWnVwMzF1ZFJmWmFFMzJTZmFqaGVZdURVZVRUam5fbE1Gb1F4bXMyMFdoVDRhSi1DcHM1bHczVThNX3A4VU11cUQ5aWRLYlRpQkhpT2tMSE93c1RJWlh5Sl92TGtHTzZhQV9QUzhiZTlIMWZKWQ?oc=5"
+    },
+    {
+      "id": "news-rss-google-6",
+      "title": "金价快速反弹，积存金营销再度升温，多家银行推出优惠活动 - 东方财富",
+      "time": "2026-08-14 08:31",
+      "source": "东方财富",
+      "summary": "金价快速反弹，积存金营销再度升温，多家银行推出优惠活动 - 东方财富",
+      "content": "金价快速反弹，积存金营销再度升温，多家银行推出优惠活动 - 东方财富（原文：https://news.google.com/rss/articles/CBMiZkFVX3lxTE9veXBnVEttdThFUy1HWG1TbzZJdXBTNk8tNF82Z0dlWHFUV19UTHdka1VLNWMzNjM0UHBtTmlya1F6ZEhTNEFLeGVIY1RmdUpQWUg5d1hjRnoyOFREczEwQ25VdFJsUQ?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE9veXBnVEttdThFUy1HWG1TbzZJdXBTNk8tNF82Z0dlWHFUV19UTHdka1VLNWMzNjM0UHBtTmlya1F6ZEhTNEFLeGVIY1RmdUpQWUg5d1hjRnoyOFREczEwQ25VdFJsUQ?oc=5"
+    },
+    {
+      "id": "news-rss-google-7",
+      "title": "瑞银：明年上半年金价或涨至5000美元 - 新浪财经",
+      "time": "2026-08-14 23:37",
+      "source": "新浪财经",
+      "summary": "瑞银：明年上半年金价或涨至5000美元 - 新浪财经",
+      "content": "瑞银：明年上半年金价或涨至5000美元 - 新浪财经（原文：https://news.google.com/rss/articles/CBMimAFBVV95cUxOWjFZNGJ0U0dzZjlNRkVUU0N0dVlqX3p1T1BGdFpNNzVxTk1XQmpnT2V5TE8zN09NYUkwVWpMb1NCaFo4eDhPcmlfWW5kd1B4RnRzZnJuenVUbURaMXN5bXdTNHR6eVhCdDgyTlZCX2g3WlV4WUFvcGlGTlBIT3VkZ3JGNVM5SlVfMUlKNXZYOEt5ZWkteG1RUg?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOWjFZNGJ0U0dzZjlNRkVUU0N0dVlqX3p1T1BGdFpNNzVxTk1XQmpnT2V5TE8zN09NYUkwVWpMb1NCaFo4eDhPcmlfWW5kd1B4RnRzZnJuenVUbURaMXN5bXdTNHR6eVhCdDgyTlZCX2g3WlV4WUFvcGlGTlBIT3VkZ3JGNVM5SlVfMUlKNXZYOEt5ZWkteG1RUg?oc=5"
+    },
+    {
+      "id": "news-rss-google-9",
+      "title": "从触底反弹，到4300-4400波动，黄金后市怎么看？ - 新浪网",
+      "time": "2026-08-14 14:45",
+      "source": "新浪网",
+      "summary": "从触底反弹，到4300-4400波动，黄金后市怎么看？ - 新浪网",
+      "content": "从触底反弹，到4300-4400波动，黄金后市怎么看？ - 新浪网（原文：https://news.google.com/rss/articles/CBMidkFVX3lxTE83YWZnSTljLUZwbk1GZ0xaTFhkeWhDOHZsNzZXejNtWVoxM0U2Q2pLZWdQc0tMcWpiOENoVTBOZFAyWnQ1aWNXZWpSTU5oc0VBWTBaVk53SVJpMUFLSzMtVHRlNWNPV2llSHhmeU9jWGFlb01WQnc?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE83YWZnSTljLUZwbk1GZ0xaTFhkeWhDOHZsNzZXejNtWVoxM0U2Q2pLZWdQc0tMcWpiOENoVTBOZFAyWnQ1aWNXZWpSTU5oc0VBWTBaVk53SVJpMUFLSzMtVHRlNWNPV2llSHhmeU9jWGFlb01WQnc?oc=5"
+    },
+    {
+      "id": "news-rss-google-10",
+      "title": "杨出发：8.16黄金回落继续看涨 - 财经号",
+      "time": "2026-08-14 13:47",
+      "source": "财经号",
+      "summary": "杨出发：8.16黄金回落继续看涨 - 财经号",
+      "content": "杨出发：8.16黄金回落继续看涨 - 财经号（原文：https://news.google.com/rss/articles/CBMiZEFVX3lxTE5oT2dSSHNrejMzM3dSSVRzdmdMa2NhWG9BUUZnamlPX0tjaWNPMnBvSlZUR0RWRmxTeWhuanFzQi1zeGU3T1hrSExSXy1yYmx0VVBSVGFtSFhCY280OHBacHhhejM?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5oT2dSSHNrejMzM3dSSVRzdmdMa2NhWG9BUUZnamlPX0tjaWNPMnBvSlZUR0RWRmxTeWhuanFzQi1zeGU3T1hrSExSXy1yYmx0VVBSVGFtSFhCY280OHBacHhhejM?oc=5"
+    },
+    {
+      "id": "news-rss-google-11",
+      "title": "光大期货0814黄金点评：通胀预期下行，黄金不涨反跌 - 新浪财经",
+      "time": "2026-08-15 01:33",
+      "source": "新浪财经",
+      "summary": "光大期货0814黄金点评：通胀预期下行，黄金不涨反跌 - 新浪财经",
+      "content": "光大期货0814黄金点评：通胀预期下行，黄金不涨反跌 - 新浪财经（原文：https://news.google.com/rss/articles/CBMimAFBVV95cUxORjRiSkRKcDF6S1l5ZVJjUkFNZDdWZ3FoaVlzM3RhMVlsV3pCblk1dGllREtobzh6VXhMTlpERk51V0x1R1Y3YnZEQjVCTGpEQ2ZvMnlkX29XNmE3NjBtQnFxN3VRdDR5X1hiaHIxVGVlU1l1X3pEYVVDal84bDZuRFg1M1NSUFk1d2lQQTZqOFJHUHR4dHFYRw?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxORjRiSkRKcDF6S1l5ZVJjUkFNZDdWZ3FoaVlzM3RhMVlsV3pCblk1dGllREtobzh6VXhMTlpERk51V0x1R1Y3YnZEQjVCTGpEQ2ZvMnlkX29XNmE3NjBtQnFxN3VRdDR5X1hiaHIxVGVlU1l1X3pEYVVDal84bDZuRFg1M1NSUFk1d2lQQTZqOFJHUHR4dHFYRw?oc=5"
+    },
+    {
+      "id": "news-rss-google-12",
+      "title": "黄金时间·每日论金：金价4400美元受阻回落 - 新浪网",
+      "time": "2026-08-14 12:43",
+      "source": "新浪网",
+      "summary": "黄金时间·每日论金：金价4400美元受阻回落 - 新浪网",
+      "content": "黄金时间·每日论金：金价4400美元受阻回落 - 新浪网（原文：https://news.google.com/rss/articles/CBMigAFBVV95cUxQTXE1MlZsOFFRc2hOeFFnTnR0d1dlMnoyc0JpWUpTV2tzbkN4VUphVU9UV2p5ZzA2TXRJWFJncUlVNkphbmRtd2R1SDEtOGdzOS1VVEotQTdEZVVaRHM2Z2tNcUltWG5wNUZuSFNMR3ZvNmo5ODNfMXRZbWlnNTY5TA?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQTXE1MlZsOFFRc2hOeFFnTnR0d1dlMnoyc0JpWUpTV2tzbkN4VUphVU9UV2p5ZzA2TXRJWFJncUlVNkphbmRtd2R1SDEtOGdzOS1VVEotQTdEZVVaRHM2Z2tNcUltWG5wNUZuSFNMR3ZvNmo5ODNfMXRZbWlnNTY5TA?oc=5"
+    },
+    {
+      "id": "news-rss-google-13",
+      "title": "“以为是奢侈品，结果亏惨了” 老铺黄金全面打折：多数产品85折抛售，距离涨价不足半年 - 新浪财经",
+      "time": "2026-08-15 00:32",
+      "source": "新浪财经",
+      "summary": "“以为是奢侈品，结果亏惨了” 老铺黄金全面打折：多数产品85折抛售，距离涨价不足半年 - 新浪财经",
+      "content": "“以为是奢侈品，结果亏惨了” 老铺黄金全面打折：多数产品85折抛售，距离涨价不足半年 - 新浪财经（原文：https://news.google.com/rss/articles/CBMimAFBVV95cUxOSDlUZjZueGh2UFFWUXpnZVRmZjc5OEhVMnFBZnJSTWFXbzFpeWJxLVk5ak5tUzJoWnhyUVIxbmJ6RmVxZ3JLbk51ZjlCWTROMy1ESkRROGVxbmZBOGpBeHlGM0ZDS1Yxd0dkNlNYRTN1ZG1ianhya3hvTXduT2t0ZWU2RmJfYXkzMVJ4YjRwU2RYN21zOVFTeQ?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOSDlUZjZueGh2UFFWUXpnZVRmZjc5OEhVMnFBZnJSTWFXbzFpeWJxLVk5ak5tUzJoWnhyUVIxbmJ6RmVxZ3JLbk51ZjlCWTROMy1ESkRROGVxbmZBOGpBeHlGM0ZDS1Yxd0dkNlNYRTN1ZG1ianhya3hvTXduT2t0ZWU2RmJfYXkzMVJ4YjRwU2RYN21zOVFTeQ?oc=5"
+    },
+    {
+      "id": "news-rss-google-14",
+      "title": "现货黄金突破4380美元，美联储利率不变概率升至近70% - 新浪网",
+      "time": "2026-08-14 12:49",
+      "source": "新浪网",
+      "summary": "现货黄金突破4380美元，美联储利率不变概率升至近70% - 新浪网",
+      "content": "现货黄金突破4380美元，美联储利率不变概率升至近70% - 新浪网（原文：https://news.google.com/rss/articles/CBMidkFVX3lxTE43S1VveVRZY0l0OHN1OXNsblVIZHVYb1M4enVMek9RWTdSZHNqVnFkeXJSaWVWZ1o2di1pRS1vSHZMNS14RkZia0RuTFpRT1JSSkJXNVVBUHVzaEEzT0ZkY3JDbFFhUHNfVktDaUhsZWhYOXY2bGc?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE43S1VveVRZY0l0OHN1OXNsblVIZHVYb1M4enVMek9RWTdSZHNqVnFkeXJSaWVWZ1o2di1pRS1vSHZMNS14RkZia0RuTFpRT1JSSkJXNVVBUHVzaEEzT0ZkY3JDbFFhUHNfVktDaUhsZWhYOXY2bGc?oc=5"
+    },
+    {
+      "id": "news-rss-google-15",
+      "title": "瑞银高呼金价明年上半年有望挑战5000美元，实际利率下行与央行购金成支柱 - 新浪财经",
+      "time": "2026-08-14 18:56",
+      "source": "新浪财经",
+      "summary": "瑞银高呼金价明年上半年有望挑战5000美元，实际利率下行与央行购金成支柱 - 新浪财经",
+      "content": "瑞银高呼金价明年上半年有望挑战5000美元，实际利率下行与央行购金成支柱 - 新浪财经（原文：https://news.google.com/rss/articles/CBMiqgFBVV95cUxQcHFPVkYyVUY4SndqTmJtZzRDMkhUTXAtbVNxVVJUQ1NYZ1MteDQwbTlFZlV1SEZmZ3MySmRwd0c4SFhZSmVhVmJqbkNhaWZqajZtM3hFSFlVSnBlYThzNnNSeERVQS1sYzRTV2xpQVc3cGQwZEVueS13TEotWC0zMFhlTk9yRGxra2xUTFQtelB1WWs0VFdlTEdlSmdHQkdBVlRaODdvWG1lZw?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQcHFPVkYyVUY4SndqTmJtZzRDMkhUTXAtbVNxVVJUQ1NYZ1MteDQwbTlFZlV1SEZmZ3MySmRwd0c4SFhZSmVhVmJqbkNhaWZqajZtM3hFSFlVSnBlYThzNnNSeERVQS1sYzRTV2xpQVc3cGQwZEVueS13TEotWC0zMFhlTk9yRGxra2xUTFQtelB1WWs0VFdlTEdlSmdHQkdBVlRaODdvWG1lZw?oc=5"
+    },
+    {
+      "id": "news-rss-google-17",
+      "title": "【专题报告】黄金：能否迎来新一轮上涨 - 新浪财经",
+      "time": "2026-08-14 16:18",
+      "source": "新浪财经",
+      "summary": "【专题报告】黄金：能否迎来新一轮上涨 - 新浪财经",
+      "content": "【专题报告】黄金：能否迎来新一轮上涨 - 新浪财经（原文：https://news.google.com/rss/articles/CBMisAFBVV95cUxQYXhlT2hvWE1NbDV3X0J6c3MxYVhiZjZJdHBQZDBXR2NwQTRWX1JZckRkRFdVaXlFRFdOZDhpRFRjQ2NmOWhMeUVmMkNWT2lESXZRbXpkNnBheGlrU1dCSjFtR1ZkMmJsWldJZlZ1eE54cHV6REZnTGhiUmQ5dDE3WHdVTEtfT2twWXpoSUllbVJnNGlXOWtuZ0R1bmlXQ0xVWThZQmtRRUV0UWdlb1B6Mw?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQYXhlT2hvWE1NbDV3X0J6c3MxYVhiZjZJdHBQZDBXR2NwQTRWX1JZckRkRFdVaXlFRFdOZDhpRFRjQ2NmOWhMeUVmMkNWT2lESXZRbXpkNnBheGlrU1dCSjFtR1ZkMmJsWldJZlZ1eE54cHV6REZnTGhiUmQ5dDE3WHdVTEtfT2twWXpoSUllbVJnNGlXOWtuZ0R1bmlXQ0xVWThZQmtRRUV0UWdlb1B6Mw?oc=5"
+    },
+    {
+      "id": "news-rss-google-19",
+      "title": "8月14日财经早餐：投资者获利了结，金价再度折戟4450关口，需求疲软叠加库存创纪录激增，油价承压 - 新浪财经",
+      "time": "2026-08-15 00:50",
+      "source": "新浪财经",
+      "summary": "8月14日财经早餐：投资者获利了结，金价再度折戟4450关口，需求疲软叠加库存创纪录激增，油价承压 - 新浪财经",
+      "content": "8月14日财经早餐：投资者获利了结，金价再度折戟4450关口，需求疲软叠加库存创纪录激增，油价承压 - 新浪财经（原文：https://news.google.com/rss/articles/CBMinAFBVV95cUxQOXhubjFNZF9ZU0lMYUNMQlBUZl9jR3pncnhvaURNSklfRlFBUDk1eEtHS1kwS1p1TDJiSWx4NHc1Q2tBTmNtUzg0bllHNlVuSEQ5eEZISG5MYnpqcW9oX29FSnJ6TGFYM0lVbGE3VVpkSlJidmk5WWRJNHhSdjhsQWp2Zi13WjJsQ0VpcDJqMWt5THRTSV9Gb0QxWXo?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQOXhubjFNZF9ZU0lMYUNMQlBUZl9jR3pncnhvaURNSklfRlFBUDk1eEtHS1kwS1p1TDJiSWx4NHc1Q2tBTmNtUzg0bllHNlVuSEQ5eEZISG5MYnpqcW9oX29FSnJ6TGFYM0lVbGE3VVpkSlJidmk5WWRJNHhSdjhsQWp2Zi13WjJsQ0VpcDJqMWt5THRTSV9Gb0QxWXo?oc=5"
+    },
+    {
+      "id": "news-rss-google-20",
+      "title": "中国黄金（600916）8月14日主力资金净买入792.11万元_主力研究 - 证券之星",
+      "time": "2026-08-15 00:30",
+      "source": "证券之星",
+      "summary": "中国黄金（600916）8月14日主力资金净买入792.11万元_主力研究 - 证券之星",
+      "content": "中国黄金（600916）8月14日主力资金净买入792.11万元_主力研究 - 证券之星（原文：https://news.google.com/rss/articles/CBMiYkFVX3lxTE8xZU15SzVKZW1ZU0FDMjRjUGYtTGp0UU5FLURKZ1hVNTRlUWFyYmh1b3c2S3R6Z1h3dVFTYzV3YjkwSG16emZIWTlMLVdqbzBxS2VGMXMtVkxIR1N2TnJHSU9n?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE8xZU15SzVKZW1ZU0FDMjRjUGYtTGp0UU5FLURKZ1hVNTRlUWFyYmh1b3c2S3R6Z1h3dVFTYzV3YjkwSG16emZIWTlMLVdqbzBxS2VGMXMtVkxIR1N2TnJHSU9n?oc=5"
+    },
+    {
+      "id": "news-rss-google-21",
+      "title": "美盘思路：黄金反弹修复，3830-3833是关键压力 - 财经号",
+      "time": "2026-08-14 13:04",
+      "source": "财经号",
+      "summary": "美盘思路：黄金反弹修复，3830-3833是关键压力 - 财经号",
+      "content": "美盘思路：黄金反弹修复，3830-3833是关键压力 - 财经号（原文：https://news.google.com/rss/articles/CBMiZEFVX3lxTFB1SS01ci16RlhiU25GVll1ME9fdUlVZFlCeE4tZlllNDBHTGJRV3NmdXRPR0Yzd0Q1WGdyWlhscXpDd00zdjVrQlJuRDVrMmR4bThaV3Z6Szl1WUxlVUpYa0tnUXY?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFB1SS01ci16RlhiU25GVll1ME9fdUlVZFlCeE4tZlllNDBHTGJRV3NmdXRPR0Yzd0Q1WGdyWlhscXpDd00zdjVrQlJuRDVrMmR4bThaV3Z6Szl1WUxlVUpYa0tnUXY?oc=5"
+    },
+    {
+      "id": "news-rss-google-24",
+      "title": "张津镭:官员喊鹰数据偏鸽 黄金4300上方先行看多 - 新浪财经",
+      "time": "2026-08-14 09:35",
+      "source": "新浪财经",
+      "summary": "张津镭:官员喊鹰数据偏鸽 黄金4300上方先行看多 - 新浪财经",
+      "content": "张津镭:官员喊鹰数据偏鸽 黄金4300上方先行看多 - 新浪财经（原文：https://news.google.com/rss/articles/CBMikgFBVV95cUxPRXVEOXVkaXZpbnh6bzlNLVFOb3BwRVo4dWtsNzY5emJrYjVmOUtRd1hlSzY1RFBWS3hwSk40OGV0ZjJWeVlhU0JRYU9wTXlGMllIODliOS13cW8xbi1rVjdYZFVOQWtyQWgzeV9zQUhIZ1ZLWDJsQ0xpTV9ZN2pUUHhLZ0tyMHVPMHBfOFhoM194Zw?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPRXVEOXVkaXZpbnh6bzlNLVFOb3BwRVo4dWtsNzY5emJrYjVmOUtRd1hlSzY1RFBWS3hwSk40OGV0ZjJWeVlhU0JRYU9wTXlGMllIODliOS13cW8xbi1rVjdYZFVOQWtyQWgzeV9zQUhIZ1ZLWDJsQ0xpTV9ZN2pUUHhLZ0tyMHVPMHBfOFhoM194Zw?oc=5"
+    },
+    {
+      "id": "news-rss-google-25",
+      "title": "许安丰：8.14黄金V形反转，后市行情趋势解析 - 财经号",
+      "time": "2026-08-14 13:24",
+      "source": "财经号",
+      "summary": "许安丰：8.14黄金V形反转，后市行情趋势解析 - 财经号",
+      "content": "许安丰：8.14黄金V形反转，后市行情趋势解析 - 财经号（原文：https://news.google.com/rss/articles/CBMiZEFVX3lxTE04WFRDLVB0WmozYVVZSnFaTVRNVkYtWlg3b0tkOHBJRFJVVmdVdmpUVVhlMTZka2hGOEJudWthcEphcGQybS1BMG1vMFp4Qjl1b3Nadk5pVDJ5ZzVSRVVQd2kxd0s?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE04WFRDLVB0WmozYVVZSnFaTVRNVkYtWlg3b0tkOHBJRFJVVmdVdmpUVVhlMTZka2hGOEJudWthcEphcGQybS1BMG1vMFp4Qjl1b3Nadk5pVDJ5ZzVSRVVQd2kxd0s?oc=5"
+    },
+    {
+      "id": "news-rss-google-26",
+      "title": "全球央行大手笔增持黄金！低PE+业绩高增长概念股出炉 6股已回撤30%以上 - 东方财富",
+      "time": "2026-08-10 04:27",
+      "source": "东方财富",
+      "summary": "全球央行大手笔增持黄金！低PE+业绩高增长概念股出炉 6股已回撤30%以上 - 东方财富",
+      "content": "全球央行大手笔增持黄金！低PE+业绩高增长概念股出炉 6股已回撤30%以上 - 东方财富（原文：https://news.google.com/rss/articles/CBMiYEFVX3lxTE9QSGh2Nl9kaVowRVBEXzM3YVk0akltYnpFVFVpeGc5X2Z1d25UV282Q0FhVW9oMDlkOWxDT1VER3NhY0lkam4tOVBwVlNHZkVuV2RVQjRqbHkyb0JpY0ZsYQ?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9QSGh2Nl9kaVowRVBEXzM3YVk0akltYnpFVFVpeGc5X2Z1d25UV282Q0FhVW9oMDlkOWxDT1VER3NhY0lkam4tOVBwVlNHZkVuV2RVQjRqbHkyb0JpY0ZsYQ?oc=5"
+    },
+    {
+      "id": "news-rss-google-27",
+      "title": "中国黄金国际逆市飙升近15% - chnfund.com",
+      "time": "2026-08-14 09:43",
+      "source": "chnfund.com",
+      "summary": "中国黄金国际逆市飙升近15% - chnfund.com",
+      "content": "中国黄金国际逆市飙升近15% - chnfund.com（原文：https://news.google.com/rss/articles/CBMiekFVX3lxTE1BZDJ3WGJnVUZ3dWhIUTRIeTNnaEFEZDZCc19KeVhLN3gzSk9uN2szcFIxWlFjQmoxLTNncFEwZ3ktZnl4akFLdFZmMXJwckpnUVZwQjZtb3Nna25zSlIzX09EWkxWemROOWhsOE1DckFyZ2ZOcGpRQi1R?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiekFVX3lxTE1BZDJ3WGJnVUZ3dWhIUTRIeTNnaEFEZDZCc19KeVhLN3gzSk9uN2szcFIxWlFjQmoxLTNncFEwZ3ktZnl4akFLdFZmMXJwckpnUVZwQjZtb3Nna25zSlIzX09EWkxWemROOWhsOE1DckFyZ2ZOcGpRQi1R?oc=5"
+    },
+    {
+      "id": "news-rss-google-28",
+      "title": "10-15万预算买珠宝哪款最值？黄金/钻石/梵克雅宝保值性全对比+FAQ - 新浪网",
+      "time": "2026-08-15 00:23",
+      "source": "新浪网",
+      "summary": "10-15万预算买珠宝哪款最值？黄金/钻石/梵克雅宝保值性全对比+FAQ - 新浪网",
+      "content": "10-15万预算买珠宝哪款最值？黄金/钻石/梵克雅宝保值性全对比+FAQ - 新浪网（原文：https://news.google.com/rss/articles/CBMigwFBVV95cUxORWdEMF9CUHhYT3dvMVhma2dzdDhQck9adzg5TnJDTEhLQlVSU2pqUFdRN0ZTcUR0NVRadmMzVGZuVVkyYmxmOV8zTEVMS1QyandROUwwdjhsaEdpMFRkQ09WUmtxZnRIdjZKRGhWUWNScFRBbzFIZXJxcWltRWppa0tMbw?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxORWdEMF9CUHhYT3dvMVhma2dzdDhQck9adzg5TnJDTEhLQlVSU2pqUFdRN0ZTcUR0NVRadmMzVGZuVVkyYmxmOV8zTEVMS1QyandROUwwdjhsaEdpMFRkQ09WUmtxZnRIdjZKRGhWUWNScFRBbzFIZXJxcWltRWppa0tMbw?oc=5"
+    },
+    {
+      "id": "news-rss-google-29",
+      "title": "珠宝圈的鄙视链真实存在吗？黄金登顶，年轻人正重新洗牌，20万买珠宝怎么保值？+FAQ - 新浪网",
+      "time": "2026-08-15 00:23",
+      "source": "新浪网",
+      "summary": "珠宝圈的鄙视链真实存在吗？黄金登顶，年轻人正重新洗牌，20万买珠宝怎么保值？+FAQ - 新浪网",
+      "content": "珠宝圈的鄙视链真实存在吗？黄金登顶，年轻人正重新洗牌，20万买珠宝怎么保值？+FAQ - 新浪网（原文：https://news.google.com/rss/articles/CBMigwFBVV95cUxQVzdTdnctbkcwdzRuekFaaTg1SDVUdmdsVEstNDNyYWxlZHNpbGJmLWowUEx4T1plekFyaU54RzZTaXlDQlRLaml3Qm5LWkVfTWNOMGw5RVp4Z245aTU4TEQ5eXZQVGFaXzFSQU1idURCNXNMZVU2aTBMQWVSb2FRWVgzWQ?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQVzdTdnctbkcwdzRuekFaaTg1SDVUdmdsVEstNDNyYWxlZHNpbGJmLWowUEx4T1plekFyaU54RzZTaXlDQlRLaml3Qm5LWkVfTWNOMGw5RVp4Z245aTU4TEQ5eXZQVGFaXzFSQU1idURCNXNMZVU2aTBMQWVSb2FRWVgzWQ?oc=5"
+    },
+    {
+      "id": "news-rss-google-30",
+      "title": "8月涨太快！黄金强势反弹后，今晚CPI会引发获利了结吗？ - 华尔街见闻",
+      "time": "2026-08-12 01:06",
+      "source": "华尔街见闻",
+      "summary": "8月涨太快！黄金强势反弹后，今晚CPI会引发获利了结吗？ - 华尔街见闻",
+      "content": "8月涨太快！黄金强势反弹后，今晚CPI会引发获利了结吗？ - 华尔街见闻（原文：https://news.google.com/rss/articles/CBMiU0FVX3lxTE5WaTVLRkhRTVRMdkNVeFRKU1lyOGV5WG8wUW4tOUJHR1JxVk1nY2JyaVNTdF9CZ2luVXVJQW1mb28wbjBGSU80aDBnUE5wMzZpaTBv?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5WaTVLRkhRTVRMdkNVeFRKU1lyOGV5WG8wUW4tOUJHR1JxVk1nY2JyaVNTdF9CZ2luVXVJQW1mb28wbjBGSU80aDBnUE5wMzZpaTBv?oc=5"
+    },
+    {
+      "id": "news-rss-google-31",
+      "title": "从国际奥赛金牌，到北大数学“黄金一代” - 新浪网",
+      "time": "2026-08-15 01:18",
+      "source": "新浪网",
+      "summary": "从国际奥赛金牌，到北大数学“黄金一代” - 新浪网",
+      "content": "从国际奥赛金牌，到北大数学“黄金一代” - 新浪网（原文：https://news.google.com/rss/articles/CBMieEFVX3lxTE5Ob0lKOXF1djdjYmRRZ0RrMVhKWFlmTU5KVWsyNjVuWjZRZG5SdDZ2LXYzcHhmMXVvRXB2YVIxdFRsQkRoYV9tclZiai1VMDF0ekF6YzhTU2JReUFXd3p2NFBNME9JLWs4aGZ3TzBNcHJOeFhfVTJIag?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE5Ob0lKOXF1djdjYmRRZ0RrMVhKWFlmTU5KVWsyNjVuWjZRZG5SdDZ2LXYzcHhmMXVvRXB2YVIxdFRsQkRoYV9tclZiai1VMDF0ekF6YzhTU2JReUFXd3p2NFBNME9JLWs4aGZ3TzBNcHJOeFhfVTJIag?oc=5"
+    },
+    {
+      "id": "news-rss-google-32",
+      "title": "CFTC持仓分析：原油黄金铜集体做多，短债超长债却遭空头围猎_外汇动态报道 - 汇通网 Fx678",
+      "time": "2026-08-15 01:43",
+      "source": "汇通网 Fx678",
+      "summary": "CFTC持仓分析：原油黄金铜集体做多，短债超长债却遭空头围猎_外汇动态报道 - 汇通网 Fx678",
+      "content": "CFTC持仓分析：原油黄金铜集体做多，短债超长债却遭空头围猎_外汇动态报道 - 汇通网 Fx678（原文：https://news.google.com/rss/articles/CBMiWkFVX3lxTFAzUkJ1bFZlbDd3T3FHSzNBc1B4UEJDZlVQUF9FSGFUU2hMelI1eWZDNTRPU0JGLUxidzdjZDB1RDJwcGZFNldUaTRSNEpnUURURUFUTzdBSWVSQQ?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFAzUkJ1bFZlbDd3T3FHSzNBc1B4UEJDZlVQUF9FSGFUU2hMelI1eWZDNTRPU0JGLUxidzdjZDB1RDJwcGZFNldUaTRSNEpnUURURUFUTzdBSWVSQQ?oc=5"
+    },
+    {
+      "id": "news-rss-google-33",
+      "title": "金价、银价、油价，都涨了 - 新浪财经",
+      "time": "2026-08-14 23:56",
+      "source": "新浪财经",
+      "summary": "金价、银价、油价，都涨了 - 新浪财经",
+      "content": "金价、银价、油价，都涨了 - 新浪财经（原文：https://news.google.com/rss/articles/CBMimAFBVV95cUxQNk9rNGlWUDVNTzRzUHB6WlFyalZuZVZub3ZWOWRCV2ZjN2xacFo2dFQ4YThHbXdoSDcxaUcwanJudGlRTlU1cUhpTHNFTFhBWllpRmw2RWE1eWRqV3c5T0JKdnltSW1Ld2tOaTRuSmpuSkRhQkg4YVIyQm5BNzZtYXdYT2t3cVF5N3kyeW5OcmVRdWxoa0dKMA?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQNk9rNGlWUDVNTzRzUHB6WlFyalZuZVZub3ZWOWRCV2ZjN2xacFo2dFQ4YThHbXdoSDcxaUcwanJudGlRTlU1cUhpTHNFTFhBWllpRmw2RWE1eWRqV3c5T0JKdnltSW1Ld2tOaTRuSmpuSkRhQkg4YVIyQm5BNzZtYXdYT2t3cVF5N3kyeW5OcmVRdWxoa0dKMA?oc=5"
+    },
+    {
+      "id": "news-rss-google-34",
+      "title": "张尧浠:阻力压制鹰言释放 金价短期调整中长期前景仍看涨 - 新浪财经",
+      "time": "2026-08-14 09:33",
+      "source": "新浪财经",
+      "summary": "张尧浠:阻力压制鹰言释放 金价短期调整中长期前景仍看涨 - 新浪财经",
+      "content": "张尧浠:阻力压制鹰言释放 金价短期调整中长期前景仍看涨 - 新浪财经（原文：https://news.google.com/rss/articles/CBMimwJBVV95cUxNMEo5cE9PZ1RTaDgyYUFLd0tGVnNrU0pHM25zd2p4d2lpY1Nqb29kV0pjUGlZeUtzOGZ0TTJkSzZxR0t5a0lJYnh4Z0xMTm4yY2RKZGpWT05yYkFjckp0czVQVGJoWXpoeVhEYU05NER5NDE2MUZ1dXZsUm9LcUpMU2tmQV9tOXBaWFFOOEcxZl9QOFIzeUZUMW5icmdXTndCcHU5cTRJNTBWOWx5dWJTQkJnM0psMVNYcVF0eFdSN1J1MXhwdmFlcFhQRjh5YUpaQXBYVjV0MkNzQW9UZXFYNTRKeG1QUXdCTmNWSHdQOEhsc0tpcTMwMUZIdGlLOU93SzBvVzhGQkh4R3hNWHhPaGJLOFpuRjR0TkVj?oc=5）",
+      "impact": "中性",
+      "analysis": "本条为每日自动抓取的快讯，暂无人工解读；行情影响请结合「波动分析-事件归因」与「金价预测」页面综合判断。",
+      "link": "https://news.google.com/rss/articles/CBMimwJBVV95cUxNMEo5cE9PZ1RTaDgyYUFLd0tGVnNrU0pHM25zd2p4d2lpY1Nqb29kV0pjUGlZeUtzOGZ0TTJkSzZxR0t5a0lJYnh4Z0xMTm4yY2RKZGpWT05yYkFjckp0czVQVGJoWXpoeVhEYU05NER5NDE2MUZ1dXZsUm9LcUpMU2tmQV9tOXBaWFFOOEcxZl9QOFIzeUZUMW5icmdXTndCcHU5cTRJNTBWOWx5dWJTQkJnM0psMVNYcVF0eFdSN1J1MXhwdmFlcFhQRjh5YUpaQXBYVjV0MkNzQW9UZXFYNTRKeG1QUXdCTmNWSHdQOEhsc0tpcTMwMUZIdGlLOU93SzBvVzhGQkh4R3hNWHhPaGJLOFpuRjR0TkVj?oc=5"
+    },
+    {
       "id": "news-rss-202608143841690166",
       "title": "韩国央行时隔13年重启黄金增持，通过基金及本土采购多渠道布局储备",
       "time": "2026-08-14 14:44",
@@ -529,96 +859,6 @@
       "content": "2025年4月22日，受全球贸易摩擦升级与美元信用担忧影响，国际金价盘中突破3500美元/盎司，创历史新高，年内涨幅一度超过30%。美元与美债同跌的罕见组合凸显了储备资产多元化需求，黄金成为最大受益者。分析人士指出，金价进入高波动区间，短期回调风险同步累积。",
       "impact": "利好金价",
       "analysis": "关税冲击下美元与美债同跌，“信用交易”叙事达到高潮；历史性关口突破后往往伴随剧烈波动，短期回撤风险大。"
-    },
-    {
-      "id": "news-2025-0411-01",
-      "title": "国际金价收盘首次站上3200美元",
-      "time": "2025-04-11 08:00",
-      "source": "第一财经",
-      "summary": "国际金价收盘首次突破3200美元/盎司，报3236.91美元。",
-      "content": "2025年4月11日，国际金价收盘报3236.91美元/盎司，为收盘价首次站上3200美元。美国关税政策引发的避险需求与美联储降息预期共同推升金价。多家投行紧急上调金价目标位，但亦有机构警告短期超买。",
-      "impact": "利好金价",
-      "analysis": "关税避险与降息预期共振推动金价加速上行；投行集体上调目标位可能强化追涨情绪，但超买信号同步累积。"
-    },
-    {
-      "id": "news-2025-0403-01",
-      "title": "美国宣布对等关税，全球市场剧震",
-      "time": "2025-04-03 07:00",
-      "source": "财联社",
-      "summary": "美国宣布大规模对等关税，全球股市与商品市场剧烈波动，避险资金涌入黄金。",
-      "content": "美国宣布对贸易伙伴征收大规模对等关税，全球市场剧烈震荡，股市下跌、美元走弱，避险资金涌入黄金与国债。市场担心关税推升通胀并拖累全球增长，对美联储降息的预期随之升温。黄金在不确定性中再度展现避险资产本色。",
-      "impact": "利好金价",
-      "analysis": "关税推升通胀预期、压制全球增长并削弱美元信用，三重利好黄金；事件冲击的脉冲性强，行情容易一步到位后进入高波动整理。"
-    },
-    {
-      "id": "news-2025-0317-01",
-      "title": "历史性时刻：国际金价收盘首次突破3000美元",
-      "time": "2025-03-17 08:00",
-      "source": "上海证券报",
-      "summary": "国际金价收盘首次站上3000美元/盎司，报3000.43美元，创历史里程碑。",
-      "content": "2025年3月17日，国际金价收盘报3000.43美元/盎司，历史上首次收于3000美元上方。从2024年3月站上2200美元到突破3000美元仅用一年，央行购金、降息预期与地缘避险三重驱动共振。市场人士评价，金价正从传统利率定价框架转向信用定价的新范式。",
-      "impact": "利好金价",
-      "analysis": "3000美元里程碑标志金价进入全新价格区间，定价框架从“利率交易”转向“信用交易”；整数关口上方初期波动通常放大。"
-    },
-    {
-      "id": "news-2025-0205-01",
-      "title": "世界黄金协会：2024年全球央行购金1045吨",
-      "time": "2025-02-05 10:00",
-      "source": "中国黄金报",
-      "summary": "2024年全球央行净购金1045吨，连续第三年超过1000吨。",
-      "content": "世界黄金协会发布报告，2024年全球央行净购金1045吨，连续第三年超过1000吨，波兰、印度、土耳其为主要买家。报告指出，俄乌冲突后美元资产被“武器化”，新兴市场央行加速储备多元化，官方购金的结构性需求是金价中枢上移的核心动力。",
-      "impact": "利好金价",
-      "analysis": "连续三年超千吨证明央行购金是趋势而非一次性行为；结构性官方买盘让金价对利率上行的敏感度系统性下降。"
-    },
-    {
-      "id": "news-2024-1030-01",
-      "title": "国际金价盘中创2790美元历史新高",
-      "time": "2024-10-30 14:30",
-      "source": "华尔街见闻",
-      "summary": "国际金价盘中触及2790美元/盎司，年内第35次刷新历史纪录。",
-      "content": "2024年10月30日，国际金价盘中触及2790美元/盎司的历史新高。全球降息周期开启、中东局势反复与央行购金构成三重支撑，黄金ETF资金持续回流。2024年全年金价涨幅约27.5%，连续第二年成为表现最佳的资产之一。",
-      "impact": "利好金价",
-      "analysis": "降息周期、地缘风险与央行购金三重共振推动年内第35次创新高；年涨27.5%后短期技术面超买，但中期逻辑未破坏。"
-    },
-    {
-      "id": "news-2024-0919-01",
-      "title": "美联储降息50个基点，开启四年首个宽松周期",
-      "time": "2024-09-19 02:00",
-      "source": "财联社",
-      "summary": "美联储以50个基点的大幅降息开启宽松周期，金价应声走高。",
-      "content": "2024年9月18日（北京时间19日凌晨），美联储宣布降息50个基点，将联邦基金利率目标区间下调至4.75%-5.00%，为2020年以来首次降息。决议公布后美元走弱，金价应声上涨。市场解读为美联储开启宽松周期，为黄金中期行情提供顺风。",
-      "impact": "利好金价",
-      "analysis": "以50个基点开启宽松周期，实际利率与美元双降直接利好黄金；降息周期的长度与幅度决定这轮行情的持续性。"
-    },
-    {
-      "id": "news-2024-0816-01",
-      "title": "国际金价收盘首次站上2500美元",
-      "time": "2024-08-16 08:00",
-      "source": "新浪财经",
-      "summary": "国际金价收盘首次突破2500美元/盎司，报2507.46美元。",
-      "content": "2024年8月16日，国际金价收盘报2507.46美元/盎司，历史上首次收于2500美元上方。美联储降息预期发酵、地缘局势紧张与央行持续购金共同推动金价上行。机构统计显示，2024年以来金价已多次刷新历史纪录，黄金牛市进入加速阶段。",
-      "impact": "利好金价",
-      "analysis": "2500关口强化牛市趋势叙事；历史经验看，整数关口突破后短期常有回踩确认，随后延续趋势。"
-    },
-    {
-      "id": "news-2024-0412-01",
-      "title": "国际金价盘中突破2400美元创历史新高",
-      "time": "2024-04-12 14:00",
-      "source": "新华财经",
-      "summary": "国际金价盘中突破2400美元/盎司，再创历史新高。",
-      "content": "2024年4月12日，国际金价盘中突破2400美元/盎司，再创历史新高。中东局势紧张、美联储降息预期与央行购金共振，金价年内涨幅一度超过15%。分析人士指出，金价短期涨速过快，技术面存在超买，但中长期上行逻辑仍然完整。",
-      "impact": "利好金价",
-      "analysis": "中东局势、降息预期与央行购金共振；涨速过快提示短期超买，但中长期上行逻辑完整。"
-    },
-    {
-      "id": "news-2024-0118-01",
-      "title": "美联储官员密集发声，降息预期降温",
-      "time": "2024-01-18 08:30",
-      "source": "财联社",
-      "summary": "美联储官员密集表态打压过早降息预期，金价高位回落。",
-      "content": "2024年1月中旬，多位美联储官员密集发声，强调通胀回落尚需确认，市场对3月降息的激进预期明显降温。美债收益率与美元反弹，金价从年初高点回落。市场人士提醒，降息预期的大幅摇摆是短期金价波动的主要来源，建议关注数据与官员表态的边际变化。",
-      "impact": "利空金价",
-      "analysis": "降息预期的摇摆是短期金价波动的主要来源；预期回摆带来美债收益率与美元反弹，金价承压，但多为阶段性回调而非趋势逆转。"
     }
   ]
 }
