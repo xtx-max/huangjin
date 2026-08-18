@@ -31,12 +31,6 @@
               <el-radio-button label="3y">近3年</el-radio-button>
               <el-radio-button label="5y">近5年</el-radio-button>
             </el-radio-group>
-            <span class="control-label">预测步长</span>
-            <el-radio-group v-model="horizon" size="small">
-              <el-radio-button :label="30">30日</el-radio-button>
-              <el-radio-button :label="60">60日</el-radio-button>
-              <el-radio-button :label="90">90日</el-radio-button>
-            </el-radio-group>
           </div>
         </div>
       </template>
@@ -45,7 +39,7 @@
       <div class="verdict" :class="verdict.dir">
         <div class="verdict-left">
           <div class="verdict-label">
-            未来 {{ horizon }} 个交易日 · {{ seriesName }} · 统计模型预测
+            未来 6 个月（约 126 个交易日） · {{ seriesName }} · 统计模型预测
           </div>
           <div class="verdict-main">
             <span class="verdict-arrow">{{ verdict.dir === 'up' ? '↗' : verdict.dir === 'down' ? '↘' : '→' }}</span>
@@ -61,6 +55,17 @@
           </div>
           <div class="verdict-meta">
             线性回归 {{ verdict.reg.toFixed(2) }} · Holt {{ verdict.holt.toFixed(2) }} · 拟合优度 R²={{ fc.r2.toFixed(3) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 四个小预测卡：明天 / 一周后 / 一个月后 / 三个月后 -->
+      <div class="mini-grid">
+        <div v-for="m in miniCards" :key="m.label" class="mini-card">
+          <div class="mini-label">{{ m.label }} · {{ m.date }}</div>
+          <div class="mini-price">{{ m.price.toFixed(2) }} <span class="mini-unit">{{ unit }}</span></div>
+          <div class="mini-pct" :class="m.dir">
+            {{ m.dir === 'up' ? '↗' : m.dir === 'down' ? '↘' : '→' }} {{ formatSigned(m.pct, 2) }}%
           </div>
         </div>
       </div>
@@ -118,7 +123,7 @@
 
       <!-- 预测结果表 -->
       <el-table :data="rows" size="small" stripe class="forecast-table">
-        <el-table-column label="预测时点" width="130">
+        <el-table-column label="关键时点" width="140">
           <template #default="{ row }">
             <span class="future-date">{{ row.date }}</span>
             <el-tag size="small" type="info" effect="plain">第{{ row.k }}日</el-tag>
@@ -176,7 +181,7 @@ type Kind = 'domestic' | 'intl'
 type FitRange = '6m' | '1y' | '3y' | '5y'
 const kind = ref<Kind>('domestic')
 const fitRange = ref<FitRange>('1y')
-const horizon = ref<number>(60)
+const HORIZON = 126 // 6 个月 ≈ 126 个交易日
 
 const RANGE_DAYS: Record<FitRange, number> = { '6m': 180, '1y': 365, '3y': 1095, '5y': 1825 }
 
@@ -201,7 +206,7 @@ const fitted = computed<number[]>(() => {
 const lastDate = computed(() => allSeries.value[allSeries.value.length - 1].date)
 const lastClose = computed(() => allSeries.value[allSeries.value.length - 1].close)
 
-const fc = computed(() => forecastSeries(fitted.value, horizon.value, lastDate.value))
+const fc = computed(() => forecastSeries(fitted.value, HORIZON, lastDate.value))
 
 const annualSlope = computed(() =>
   lastClose.value > 0 ? (fc.value.regSlope * 252 / lastClose.value) * 100 : null,
@@ -221,7 +226,7 @@ interface Verdict {
 }
 
 const verdict = computed<Verdict>(() => {
-  const h = horizon.value - 1
+  const h = HORIZON - 1
   const reg = fc.value.reg[h]
   const holt = fc.value.holt[h]
   const target = (reg + holt) / 2
@@ -271,7 +276,7 @@ const analysisSections = computed<Section[]>(() => {
   const p90 = pct(90)
 
   // 历史参照：扫描全历史，找"过去 H 日涨幅与当前接近"的时期，统计其后 H 日实际表现
-  const h = horizon.value
+  const h = HORIZON
   const curRet = pct(h)
   let cnt = 0
   let sum = 0
@@ -333,6 +338,25 @@ const analysisSections = computed<Section[]>(() => {
   ]
 })
 
+const MINI_HORIZONS = [
+  { key: 1, label: '明天' },
+  { key: 5, label: '一周后' },
+  { key: 22, label: '一个月后' },
+  { key: 66, label: '三个月后' },
+]
+
+const miniCards = computed(() =>
+  MINI_HORIZONS.map(({ key, label }) => {
+    const i = key - 1
+    const reg = fc.value.reg[i]
+    const holt = fc.value.holt[i]
+    const target = (reg + holt) / 2
+    const pct = lastClose.value > 0 ? ((target - lastClose.value) / lastClose.value) * 100 : 0
+    const dir: 'up' | 'down' | 'flat' = pct > 0.15 ? 'up' : pct < -0.15 ? 'down' : 'flat'
+    return { label, date: fc.value.dates[i], price: target, pct, dir }
+  }),
+)
+
 interface Row {
   k: number
   date: string
@@ -341,14 +365,15 @@ interface Row {
   low: number
   high: number
 }
+const KEY_DAYS = [1, 5, 22, 66, 126]
 const rows = computed<Row[]>(() =>
-  fc.value.dates.map((d, i) => ({
-    k: i + 1,
-    date: d,
-    reg: fc.value.reg[i],
-    holt: fc.value.holt[i],
-    low: fc.value.low[i],
-    high: fc.value.high[i],
+  KEY_DAYS.map((k) => ({
+    k,
+    date: fc.value.dates[k - 1],
+    reg: fc.value.reg[k - 1],
+    holt: fc.value.holt[k - 1],
+    low: fc.value.low[k - 1],
+    high: fc.value.high[k - 1],
   })),
 )
 
@@ -433,7 +458,7 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
 })
 
-watch([kind, fitRange, horizon], () => {
+watch([kind, fitRange], () => {
   renderChart()
 })
 
@@ -555,6 +580,50 @@ function changeClass(v: number | null): string {
   font-size: 12px;
   opacity: 0.8;
 }
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.mini-card {
+  background: #ffffff;
+  border: 1px solid #e6e6ec;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+.mini-label {
+  font-size: 12px;
+  color: #4a4a50;
+}
+.mini-price {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+}
+.mini-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: #4a4a50;
+}
+.mini-pct {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mini-pct.up {
+  color: #c65f57;
+}
+.mini-pct.down {
+  color: #4c8a63;
+}
+.mini-pct.flat {
+  color: #6e6e73;
+}
 .analysis-card {
   background: #ffffff;
   border: none;
@@ -645,6 +714,9 @@ function changeClass(v: number | null): string {
   }
   .verdict-word {
     font-size: 24px;
+  }
+  .mini-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>
