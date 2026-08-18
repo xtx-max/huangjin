@@ -35,7 +35,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if ! git diff --quiet; then
             git add frontend/src/data/gold-prices.json
-            git commit -m "chore: 每周自动补全国际金价日线"
+            git commit -m "chore: 每日自动更新行情数据"
             git push
           else
             echo "数据已是最新，跳过提交"
