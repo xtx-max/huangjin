@@ -130,6 +130,9 @@ def fetch_international_monthly():
 
 
 def read_token() -> str:
+    env_token = os.environ.get("TUSHARE_TOKEN", "").strip()
+    if env_token:
+        return env_token
     if not os.path.exists(ENV_PATH):
         print("错误：未找到 .env 文件，请先创建并写入 TUSHARE_TOKEN=xxx", file=sys.stderr)
         sys.exit(1)

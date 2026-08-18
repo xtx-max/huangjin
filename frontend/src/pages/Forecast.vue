@@ -17,6 +17,9 @@
             <span>金价预测</span>
             <el-tag size="small" type="warning" effect="plain">{{ seriesName }}</el-tag>
             <el-tag size="small" type="info" effect="plain">数据截至 {{ lastDate }}</el-tag>
+            <el-tag v-if="livePoint" size="small" type="success" effect="plain">
+              实时 {{ livePoint.close.toFixed(2) }} {{ unit }}（已纳入预测）
+            </el-tag>
           </div>
           <div class="header-controls">
             <span class="control-label">品种</span>
@@ -168,6 +171,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import { Compass, DataAnalysis, InfoFilled } from '@element-plus/icons-vue'
 import { loadGoldPrices } from '@/data/goldPrices'
+import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { forecastSeries } from '@/utils/forecast'
 import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import { usePageMotion } from '@/composables/usePageMotion'
@@ -188,11 +192,46 @@ const RANGE_DAYS: Record<FitRange, number> = { '6m': 180, '1y': 365, '3y': 1095,
 const seriesName = computed(() => (kind.value === 'domestic' ? '国内金价 Au99.99' : '国际金价 XAU/USD'))
 const unit = computed(() => (kind.value === 'domestic' ? '元/克' : '美元/盎司'))
 
-const allSeries = computed<Array<{ date: string; close: number }>>(() =>
-  kind.value === 'domestic'
-    ? data.domestic.map((p) => ({ date: p.date, close: p.close }))
-    : data.internationalDaily.map((p) => ({ date: p.date, close: p.close })),
-)
+const liveQuotes = ref<LiveQuotes | null>(null)
+let quoteTimer: number | null = null
+const todayIso = new Date().toISOString().slice(0, 10)
+
+function scheduleQuotes(ms: number) {
+  if (quoteTimer !== null) window.clearTimeout(quoteTimer)
+  quoteTimer = window.setTimeout(refreshQuotes, ms)
+}
+
+async function refreshQuotes() {
+  try {
+    liveQuotes.value = await fetchLiveQuotes()
+    scheduleQuotes(30000)
+  } catch {
+    scheduleQuotes(10000)
+  }
+}
+
+/** 当日实时价（若晚于静态数据尾端，则注入序列参与预测） */
+const livePoint = computed<{ date: string; close: number } | null>(() => {
+  if (kind.value === 'domestic' && liveQuotes.value?.domestic) {
+    return { date: todayIso, close: liveQuotes.value.domestic.price }
+  }
+  if (kind.value === 'intl' && liveQuotes.value?.intl) {
+    return { date: todayIso, close: liveQuotes.value.intl.price }
+  }
+  return null
+})
+
+const allSeries = computed<Array<{ date: string; close: number }>>(() => {
+  const base =
+    kind.value === 'domestic'
+      ? data.domestic.map((p) => ({ date: p.date, close: p.close }))
+      : data.internationalDaily.map((p) => ({ date: p.date, close: p.close }))
+  const lp = livePoint.value
+  if (lp && lp.date > base[base.length - 1].date) {
+    return [...base, lp]
+  }
+  return base
+})
 
 const fitted = computed<number[]>(() => {
   const all = allSeries.value
@@ -255,87 +294,68 @@ const analysisSections = computed<Section[]>(() => {
   const closes = allSeries.value.map((p) => p.close)
   const n = closes.length
   const last = closes[n - 1]
-  const fit = fitted.value
-  const fitLen = fit.length
-  const fitChange = fit[0] > 0 ? ((fit[fitLen - 1] - fit[0]) / fit[0]) * 100 : 0
-  const pct = (days: number): number | null => {
-    if (n <= days) return null
-    return ((last - closes[n - days - 1]) / closes[n - days - 1]) * 100
-  }
-  const ma = (days: number): number | null => {
-    if (n < days) return null
-    const slice = closes.slice(-days)
-    return slice.reduce((a, b) => a + b, 0) / days
-  }
-  const ma20 = ma(20)
-  const ma60 = ma(60)
-  const r2 = fc.value.r2
   const residRel = last > 0 ? (fc.value.residStd / last) * 100 : 0
-  const p30 = pct(30)
-  const p60 = pct(60)
-  const p90 = pct(90)
 
-  // 历史参照：扫描全历史，找"过去 H 日涨幅与当前接近"的时期，统计其后 H 日实际表现
-  const h = HORIZON
-  const curRet = pct(h)
-  let cnt = 0
-  let sum = 0
-  let wins = 0
-  if (curRet !== null) {
-    for (let i = h; i + h < n; i++) {
-      const pastRet = ((closes[i] - closes[i - h]) / closes[i - h]) * 100
-      if (Math.abs(pastRet - curRet) <= 2) {
-        const fwd = ((closes[i + h] - closes[i]) / closes[i]) * 100
-        cnt++
-        sum += fwd
-        if (fwd > 0) wins++
+  // 各时点：预测值 / 两模型分歧 / 区间宽度 / 该时点的历史参照
+  const PERIODS = [
+    { key: 1, label: '明天', risk: '隔夜风险最大：国内金价开盘跟随隔夜国际盘与汇率，单一交易日噪声极高，该时点预测仅供参考。' },
+    { key: 5, label: '一周后', risk: '一周窗口内突发新闻（美联储官员讲话、地缘消息）可能造成跳空，短期预测容易被事件打断。' },
+    { key: 22, label: '一个月后', risk: '一个月窗口可能跨越美联储议息会议与重要经济数据，利率预期的变化是主要扰动源。' },
+    { key: 66, label: '三个月后', risk: '三个月窗口足以容纳一轮政策转向或地缘冲突的演化，趋势外推的失效概率明显上升。' },
+    { key: 126, label: '六个月后', risk: '六个月维度上基本面（实际利率、央行购金节奏、美元周期）可能整体漂移，模型外推仅代表"当前趋势不变"的假设情形。' },
+  ]
+
+  const sections: Section[] = []
+  for (const P of PERIODS) {
+    const i = P.key - 1
+    const reg = fc.value.reg[i]
+    const holt = fc.value.holt[i]
+    const price = (reg + holt) / 2
+    const pctVal = last > 0 ? ((price - last) / last) * 100 : 0
+    const low = fc.value.low[i]
+    const high = fc.value.high[i]
+    const width = price > 0 ? ((high - low) / price) * 100 : 0
+    const divergence = price > 0 ? (Math.abs(reg - holt) / price) * 100 : 0
+
+    // 历史参照（该时点维度）：过去 H 日涨幅与当前接近的时期，其后 H 日实际表现
+    const curRet = (() => {
+      if (n <= P.key) return null
+      return ((last - closes[n - P.key - 1]) / closes[n - P.key - 1]) * 100
+    })()
+    let cnt = 0
+    let sum = 0
+    let wins = 0
+    if (curRet !== null) {
+      for (let j = P.key; j + P.key < n; j++) {
+        const pastRet = ((closes[j] - closes[j - P.key]) / closes[j - P.key]) * 100
+        if (Math.abs(pastRet - curRet) <= 1.5) {
+          const fwd = ((closes[j + P.key] - closes[j]) / closes[j]) * 100
+          cnt++
+          sum += fwd
+          if (fwd > 0) wins++
+        }
       }
     }
-  }
-  const analogAvg = cnt > 0 ? sum / cnt : null
-  const analogWin = cnt > 0 ? (wins / cnt) * 100 : null
+    const analogAvg = cnt > 0 ? sum / cnt : null
+    const analogWin = cnt > 0 ? (wins / cnt) * 100 : null
 
-  const s1: string[] = [
-    `拟合区间（近${fitRange.value === '6m' ? '6个月' : fitRange.value === '1y' ? '1年' : fitRange.value === '3y' ? '3年' : '5年'}，${fitLen} 个交易日）累计涨跌幅 ${formatSigned(fitChange, 2)}%，趋势斜率年化 ${formatSigned(annualSlope.value, 1)}%。`,
-    `动量面：近 30 日 ${formatSigned(p30, 1)}%、近 60 日 ${formatSigned(p60, 1)}%、近 90 日 ${formatSigned(p90, 1)}%；现价${ma20 !== null ? `位于 20 日均线${last >= ma20 ? '上方' : '下方'} ${Math.abs(((last - ma20) / ma20) * 100).toFixed(1)}%、` : ''}${ma60 !== null ? `位于 60 日均线${last >= ma60 ? '上方' : '下方'} ${Math.abs(((last - ma60) / ma60) * 100).toFixed(1)}%。` : ''}`,
-    `模型质量：线性拟合优度 R²=${r2.toFixed(3)}（${r2 > 0.8 ? '趋势解释力强，外推相对可信' : r2 > 0.5 ? '趋势解释力中等' : '趋势解释力弱，方向判断需谨慎'}）；残差相对波动 ${residRel.toFixed(1)}%，决定预测区间宽度。`,
-  ]
-  const support: string[] = []
-  const risk: string[] = []
-  if ((annualSlope.value ?? 0) > 0) support.push('区间趋势斜率为正，模型延续上涨惯性')
-  else if ((annualSlope.value ?? 0) < 0) support.push('区间趋势斜率为负，模型延续下跌惯性')
-  if (ma20 !== null && last >= ma20) support.push('现价站上 20 日均线，短线动能偏多')
-  if (ma60 !== null && last >= ma60) support.push('现价站上 60 日均线，中期趋势偏多')
-  if (ma20 !== null && last < ma20) risk.push('现价跌破 20 日均线，短线动能转弱')
-  if (ma60 !== null && last < ma60) risk.push('现价跌破 60 日均线，中期趋势承压')
-  if (r2 < 0.5) risk.push('R² 偏低，线性趋势对该区间解释力不足，方向存在反转可能')
-  if (residRel > 2.5) risk.push('历史波动较大，预测区间很宽，实际落点不确定性高')
-  if ((p90 ?? 0) > 15) risk.push('近 90 日已上涨超过 15%，短期追高与均值回归风险上升')
-  if ((p90 ?? 0) < -15) risk.push('近 90 日已下跌超过 15%，超跌反弹与惯性下杀并存')
-  if (support.length === 0) support.push('当前无显著的多头信号，模型结论主要来自区间趋势外推')
-  if (risk.length === 0) risk.push('当前无显著的异常风险信号，主要风险来自基本面事件冲击')
-
-  const s3: string[] = []
-  if (analogAvg !== null) {
-    s3.push(
-      `在 ${seriesName.value} 全部历史中，出现与当前近 ${h} 日动能（${formatSigned(curRet, 1)}%）相近的情形共 ${cnt} 次；这 ${cnt} 次之后的 ${h} 个交易日平均涨跌 ${formatSigned(analogAvg, 1)}%，其中上涨 ${(analogWin ?? 0).toFixed(0)}% / 下跌 ${(100 - (analogWin ?? 0)).toFixed(0)}%。`,
-      `注意：历史相似情形只是统计参照，每次行情的宏观环境与事件背景都不同，不能机械套用。`,
+    const paras: string[] = []
+    paras.push(
+      `预测值：${fc.value.dates[i]}（${P.label}），线性回归 ${reg.toFixed(2)} ${unit.value}、Holt 平滑 ${holt.toFixed(2)} ${unit.value}，两者均值 ${price.toFixed(2)} ${unit.value}，较当前 ${formatSigned(pctVal, 2)}%；90% 区间 ${low.toFixed(0)} ~ ${high.toFixed(0)} ${unit.value}（宽度 ${width.toFixed(0)}%）。`,
     )
-  } else {
-    s3.push('历史数据长度不足，无法生成动能相似情形的统计参照。')
+    paras.push(
+      `模型依据：两模型分歧度 ${divergence.toFixed(1)}%（${divergence < 1 ? '分歧很小，结论一致性高' : divergence < 3 ? '分歧适中' : '分歧较大，方向判断需打折'}）；${P.key} 日维度的区间宽度 ${width.toFixed(0)}% 由残差波动 ${residRel.toFixed(1)}% 与步长共同决定，步长越长区间越宽。`,
+    )
+    if (analogAvg !== null) {
+      paras.push(
+        `历史参照（${P.label}维度）：历史上与当前近 ${P.key} 日动能（${formatSigned(curRet, 1)}%）相近的情形共 ${cnt} 次，其后 ${P.key} 个交易日平均 ${formatSigned(analogAvg, 1)}%，上涨概率 ${(analogWin ?? 0).toFixed(0)}%。`,
+      )
+    }
+    paras.push(`时段风险：${P.risk}`)
+    sections.push({ heading: `${P.label}（${fc.value.dates[i]}）`, paragraphs: paras })
   }
 
-  const s4: string[] = [
-    '统计模型只看到价格本身：它不知道美联储议息、地缘冲突、央行购金等基本面事件。事件冲击会瞬间改写趋势（参考本站「事件时间线」与「波动分析-事件归因」）。',
-    '预测区间是 90% 置信度的统计区间，并非"保证落在其中"；预测步长越长、历史波动越大，不确定性越高。本预测不构成投资建议。',
-  ]
-
-  return [
-    { heading: '趋势依据', paragraphs: s1 },
-    { heading: '多空因素', paragraphs: [`【支撑】${support.join('；')}。`, `【风险】${risk.join('；')}。`] },
-    { heading: '历史参照', paragraphs: s3 },
-    { heading: '风险提示', paragraphs: s4 },
-  ]
+  return sections
 })
 
 const MINI_HORIZONS = [
@@ -456,6 +476,7 @@ function handleResize() {
 onMounted(() => {
   renderChart()
   window.addEventListener('resize', handleResize)
+  refreshQuotes()
 })
 
 watch([kind, fitRange], () => {
@@ -464,6 +485,7 @@ watch([kind, fitRange], () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  if (quoteTimer !== null) window.clearTimeout(quoteTimer)
   chart?.dispose()
   chart = null
 })
@@ -536,17 +558,18 @@ function changeClass(v: number | null): string {
   color: #fff;
 }
 .verdict.up {
-  background: linear-gradient(135deg, #a33b32 0%, #c65f57 100%);
+  background: linear-gradient(135deg, #7e2a24 0%, #a8453b 100%);
 }
 .verdict.down {
-  background: linear-gradient(135deg, #2f6b48 0%, #4c8a63 100%);
+  background: linear-gradient(135deg, #1f5136 0%, #3c6b4c 100%);
 }
 .verdict.flat {
-  background: linear-gradient(135deg, #4a4a50 0%, #6e6e73 100%);
+  background: linear-gradient(135deg, #3a3a40 0%, #55555a 100%);
 }
 .verdict-label {
-  font-size: 13px;
-  opacity: 0.85;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 .verdict-main {
   display: flex;
@@ -555,30 +578,34 @@ function changeClass(v: number | null): string {
   margin-top: 8px;
 }
 .verdict-arrow {
-  font-size: 34px;
-  font-weight: 700;
+  font-size: 38px;
+  font-weight: 800;
+  color: #ffffff;
 }
 .verdict-word {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  color: #ffffff;
 }
 .verdict-sub {
   margin-top: 8px;
-  font-size: 14px;
-  opacity: 0.92;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
 }
 .verdict-right {
   text-align: right;
 }
 .verdict-band {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #ffffff;
 }
 .verdict-meta {
   margin-top: 8px;
-  font-size: 12px;
-  opacity: 0.8;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.95);
 }
 .mini-grid {
   display: grid;
