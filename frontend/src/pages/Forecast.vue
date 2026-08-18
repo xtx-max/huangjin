@@ -65,6 +65,20 @@
         </div>
       </div>
 
+      <!-- 预测详细分析 -->
+      <div class="analysis-card">
+        <div class="analysis-title">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>预测详细分析</span>
+        </div>
+        <div class="analysis-sections">
+          <template v-for="(sec, i) in analysisSections" :key="i">
+            <div v-if="sec.heading" class="sec-heading">{{ sec.heading }}</div>
+            <p v-for="(para, j) in sec.paragraphs" :key="j" class="sec-para">{{ para }}</p>
+          </template>
+        </div>
+      </div>
+
       <!-- 指标卡片 -->
       <el-row :gutter="12" class="stats-row">
         <el-col :xs="12" :sm="6">
@@ -147,7 +161,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
-import { Compass, InfoFilled } from '@element-plus/icons-vue'
+import { Compass, DataAnalysis, InfoFilled } from '@element-plus/icons-vue'
 import { loadGoldPrices } from '@/data/goldPrices'
 import { forecastSeries } from '@/utils/forecast'
 import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
@@ -224,6 +238,99 @@ const verdict = computed<Verdict>(() => {
     reg,
     holt,
   }
+})
+
+interface Section {
+  heading: string
+  paragraphs: string[]
+}
+
+/** 预测详细分析：全部结论由真实数据计算得出 */
+const analysisSections = computed<Section[]>(() => {
+  const closes = allSeries.value.map((p) => p.close)
+  const n = closes.length
+  const last = closes[n - 1]
+  const fit = fitted.value
+  const fitLen = fit.length
+  const fitChange = fit[0] > 0 ? ((fit[fitLen - 1] - fit[0]) / fit[0]) * 100 : 0
+  const pct = (days: number): number | null => {
+    if (n <= days) return null
+    return ((last - closes[n - days - 1]) / closes[n - days - 1]) * 100
+  }
+  const ma = (days: number): number | null => {
+    if (n < days) return null
+    const slice = closes.slice(-days)
+    return slice.reduce((a, b) => a + b, 0) / days
+  }
+  const ma20 = ma(20)
+  const ma60 = ma(60)
+  const r2 = fc.value.r2
+  const residRel = last > 0 ? (fc.value.residStd / last) * 100 : 0
+  const p30 = pct(30)
+  const p60 = pct(60)
+  const p90 = pct(90)
+
+  // 历史参照：扫描全历史，找"过去 H 日涨幅与当前接近"的时期，统计其后 H 日实际表现
+  const h = horizon.value
+  const curRet = pct(h)
+  let cnt = 0
+  let sum = 0
+  let wins = 0
+  if (curRet !== null) {
+    for (let i = h; i + h < n; i++) {
+      const pastRet = ((closes[i] - closes[i - h]) / closes[i - h]) * 100
+      if (Math.abs(pastRet - curRet) <= 2) {
+        const fwd = ((closes[i + h] - closes[i]) / closes[i]) * 100
+        cnt++
+        sum += fwd
+        if (fwd > 0) wins++
+      }
+    }
+  }
+  const analogAvg = cnt > 0 ? sum / cnt : null
+  const analogWin = cnt > 0 ? (wins / cnt) * 100 : null
+
+  const s1: string[] = [
+    `拟合区间（近${fitRange.value === '6m' ? '6个月' : fitRange.value === '1y' ? '1年' : fitRange.value === '3y' ? '3年' : '5年'}，${fitLen} 个交易日）累计涨跌幅 ${formatSigned(fitChange, 2)}%，趋势斜率年化 ${formatSigned(annualSlope.value, 1)}%。`,
+    `动量面：近 30 日 ${formatSigned(p30, 1)}%、近 60 日 ${formatSigned(p60, 1)}%、近 90 日 ${formatSigned(p90, 1)}%；现价${ma20 !== null ? `位于 20 日均线${last >= ma20 ? '上方' : '下方'} ${Math.abs(((last - ma20) / ma20) * 100).toFixed(1)}%、` : ''}${ma60 !== null ? `位于 60 日均线${last >= ma60 ? '上方' : '下方'} ${Math.abs(((last - ma60) / ma60) * 100).toFixed(1)}%。` : ''}`,
+    `模型质量：线性拟合优度 R²=${r2.toFixed(3)}（${r2 > 0.8 ? '趋势解释力强，外推相对可信' : r2 > 0.5 ? '趋势解释力中等' : '趋势解释力弱，方向判断需谨慎'}）；残差相对波动 ${residRel.toFixed(1)}%，决定预测区间宽度。`,
+  ]
+  const support: string[] = []
+  const risk: string[] = []
+  if ((annualSlope.value ?? 0) > 0) support.push('区间趋势斜率为正，模型延续上涨惯性')
+  else if ((annualSlope.value ?? 0) < 0) support.push('区间趋势斜率为负，模型延续下跌惯性')
+  if (ma20 !== null && last >= ma20) support.push('现价站上 20 日均线，短线动能偏多')
+  if (ma60 !== null && last >= ma60) support.push('现价站上 60 日均线，中期趋势偏多')
+  if (ma20 !== null && last < ma20) risk.push('现价跌破 20 日均线，短线动能转弱')
+  if (ma60 !== null && last < ma60) risk.push('现价跌破 60 日均线，中期趋势承压')
+  if (r2 < 0.5) risk.push('R² 偏低，线性趋势对该区间解释力不足，方向存在反转可能')
+  if (residRel > 2.5) risk.push('历史波动较大，预测区间很宽，实际落点不确定性高')
+  if ((p90 ?? 0) > 15) risk.push('近 90 日已上涨超过 15%，短期追高与均值回归风险上升')
+  if ((p90 ?? 0) < -15) risk.push('近 90 日已下跌超过 15%，超跌反弹与惯性下杀并存')
+  if (support.length === 0) support.push('当前无显著的多头信号，模型结论主要来自区间趋势外推')
+  if (risk.length === 0) risk.push('当前无显著的异常风险信号，主要风险来自基本面事件冲击')
+
+  const s3: string[] = []
+  if (analogAvg !== null) {
+    s3.push(
+      `在 ${seriesName.value} 全部历史中，出现与当前近 ${h} 日动能（${formatSigned(curRet, 1)}%）相近的情形共 ${cnt} 次；这 ${cnt} 次之后的 ${h} 个交易日平均涨跌 ${formatSigned(analogAvg, 1)}%，其中上涨 ${(analogWin ?? 0).toFixed(0)}% / 下跌 ${(100 - (analogWin ?? 0)).toFixed(0)}%。`,
+      `注意：历史相似情形只是统计参照，每次行情的宏观环境与事件背景都不同，不能机械套用。`,
+    )
+  } else {
+    s3.push('历史数据长度不足，无法生成动能相似情形的统计参照。')
+  }
+
+  const s4: string[] = [
+    '统计模型只看到价格本身：它不知道美联储议息、地缘冲突、央行购金等基本面事件。事件冲击会瞬间改写趋势（参考本站「事件时间线」与「波动分析-事件归因」）。',
+    '预测区间是 90% 置信度的统计区间，并非"保证落在其中"；预测步长越长、历史波动越大，不确定性越高。本预测不构成投资建议。',
+  ]
+
+  return [
+    { heading: '趋势依据', paragraphs: s1 },
+    { heading: '多空因素', paragraphs: [`【支撑】${support.join('；')}。`, `【风险】${risk.join('；')}。`] },
+    { heading: '历史参照', paragraphs: s3 },
+    { heading: '风险提示', paragraphs: s4 },
+  ]
 })
 
 interface Row {
@@ -447,6 +554,40 @@ function changeClass(v: number | null): string {
   margin-top: 8px;
   font-size: 12px;
   opacity: 0.8;
+}
+.analysis-card {
+  background: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 22px 26px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+.analysis-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+.sec-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #8a6d1f;
+  margin: 14px 0 6px;
+}
+.sec-heading:first-child {
+  margin-top: 0;
+}
+.sec-para {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #1d1d1f;
+  line-height: 2;
+  text-align: justify;
 }
 .stats-row {
   margin-bottom: 20px;
