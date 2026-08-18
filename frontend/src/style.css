@@ -25,15 +25,15 @@
 
   /* Apple 中性色阶 */
   --text-color-primary: #1d1d1f;
-  --text-color-regular: #333336;
-  --text-color-secondary: #55555a;
-  --text-color-placeholder: #8f8f96;
+  --text-color-regular: #232326;
+  --text-color-secondary: #4a4a50;
+  --text-color-placeholder: #7a7a80;
   --text-color-disabled: #c7c7cc;
 
-  --bg-color-base: #f5f5f7;
+  --bg-color-base: #ffffff;
   --bg-color-card: #ffffff;
   --bg-color-overlay: rgba(29, 29, 31, 0.5);
-  --border-color-base: #dcdce2;
+  --border-color-base: #e0e0e6;
   --border-color-light: #e8e8ee;
   --border-color-dark: #d2d2d7;
 
@@ -47,11 +47,11 @@
   --el-border-color: #e8e8ed;
   --el-border-color-light: #f0f0f4;
   --el-border-color-lighter: #f5f5f7;
-  --el-bg-color-page: #f5f5f7;
+  --el-bg-color-page: #ffffff;
   --el-fill-color-light: #f5f5f7;
   --el-fill-color-blank: #ffffff;
   --el-border-radius-base: 10px;
-  --el-box-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.05);
+  --el-box-shadow-light: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 28px rgba(0, 0, 0, 0.06);
 
   /* 字体（Apple 系统栈：SF Pro + 苹方） */
   --font-family-base: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC',
@@ -91,7 +91,7 @@ body {
 /* ---- Element Plus 组件 Apple 化 ---- */
 .el-card {
   border-radius: 18px;
-  border: 1px solid #ececf0;
+  border: 1px solid #e6e6ec;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
@@ -130,19 +130,19 @@ body {
 
 .el-table {
   font-size: 13px;
-  color: #333336;
+  color: #232326;
 }
 
 .el-table th.el-table__cell {
   background-color: transparent;
-  color: #4a4a50;
+  color: #333336;
   font-weight: 600;
   font-size: 12px;
 }
 
 .el-table td.el-table__cell {
   padding: 13px 0;
-  border-bottom: 1px solid #e5e5ea;
+  border-bottom: 1px solid #e8e8ee;
 }
 
 .el-table::before {
@@ -179,7 +179,7 @@ body {
 
 /* iOS 分段控件风格的 radio 组（时间范围/视图切换） */
 .el-radio-group {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 980px;
   padding: 3px;
 }
@@ -188,7 +188,7 @@ body {
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
-  color: #333336 !important;
+  color: #232326 !important;
   border-radius: 980px !important;
   padding: 6px 16px !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);

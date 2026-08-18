@@ -118,11 +118,11 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .detail-date {
   font-size: 13px;
-  color: #5b5b61;
+  color: #4a4a50;
 }
 .detail-region {
   font-size: 12px;
-  color: #5b5b61;
+  color: #4a4a50;
 }
 .detail-summary-box {
   margin: 14px 0 18px;
@@ -132,14 +132,14 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .summary-label {
   font-size: 12px;
-  color: #5b5b61;
+  color: #4a4a50;
   display: block;
   margin-bottom: 4px;
 }
 .detail-summary {
   margin: 0;
   font-size: 14px;
-  color: #3a3a3c;
+  color: #232326;
   line-height: 1.7;
 }
 .detail-analysis-title {

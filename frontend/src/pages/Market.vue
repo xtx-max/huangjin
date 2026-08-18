@@ -306,7 +306,7 @@ function changeClass(v: number | null): string {
 }
 .stat-label {
   font-size: 12px;
-  color: #5b5b61;
+  color: #4a4a50;
 }
 .stat-value {
   font-size: 30px;
@@ -317,7 +317,7 @@ function changeClass(v: number | null): string {
 }
 .stat-sub {
   font-size: 12px;
-  color: #5b5b61;
+  color: #4a4a50;
   margin-top: 4px;
 }
 .up {
