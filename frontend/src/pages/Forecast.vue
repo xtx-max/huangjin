@@ -497,7 +497,7 @@ function changeClass(v: number | null): string {
 }
 .control-label {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .verdict {
   display: flex;
@@ -601,7 +601,7 @@ function changeClass(v: number | null): string {
 }
 .stat-label {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .stat-value {
   font-size: 30px;
@@ -612,7 +612,7 @@ function changeClass(v: number | null): string {
 }
 .stat-sub {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
   margin-top: 4px;
 }
 .up {
@@ -637,7 +637,7 @@ function changeClass(v: number | null): string {
   padding-left: 20px;
   line-height: 2;
   font-size: 13px;
-  color: #57544c;
+  color: #3a3a3c;
 }
 @media (max-width: 768px) {
   .chart {

@@ -331,7 +331,7 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 .count {
   font-size: 12px;
   font-weight: 400;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .live-section {
   border: 1px dashed #b08a3e;
@@ -368,7 +368,7 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .live-meta {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .live-list {
   display: flex;
@@ -391,12 +391,12 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .live-item-meta {
   font-size: 12px;
-  color: #b3afa4;
+  color: #8f8f96;
   margin-top: 2px;
 }
 .live-empty {
   font-size: 13px;
-  color: #b3afa4;
+  color: #8f8f96;
   padding: 6px 0;
 }
 .curated-title {
@@ -443,12 +443,12 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .news-time {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .news-summary {
   margin: 8px 0 0;
   font-size: 13px;
-  color: #57544c;
+  color: #3a3a3c;
   line-height: 1.6;
 }
 .detail-meta {
@@ -458,12 +458,12 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .detail-time {
   font-size: 13px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .detail-summary {
   margin: 12px 0;
   font-size: 14px;
-  color: #57544c;
+  color: #3a3a3c;
   line-height: 1.7;
 }
 .detail-content-title {

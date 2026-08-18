@@ -547,7 +547,7 @@ function changeClass(v: number | null): string {
 .impact-tip {
   font-size: 12px;
   font-weight: 400;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .event-link {
   color: #5b7c99;
@@ -556,7 +556,7 @@ function changeClass(v: number | null): string {
 }
 .event-date-sub {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 @media (max-width: 768px) {
   .hero-inner {

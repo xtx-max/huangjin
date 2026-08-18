@@ -11,21 +11,21 @@ export const CHART_TOOLTIP = {
 export const CHART_X = {
   axisLine: { show: false },
   axisTick: { show: false },
-  axisLabel: { color: '#8a8a8e', fontSize: 11 },
+  axisLabel: { color: '#55555a', fontSize: 11 },
   boundaryGap: false,
 }
 
 export const CHART_Y = {
   axisLine: { show: false },
   axisTick: { show: false },
-  axisLabel: { color: '#8a8a8e', fontSize: 11 },
-  nameTextStyle: { color: '#8a8a8e', fontSize: 11 },
-  splitLine: { lineStyle: { color: '#f0f0f2', type: 'dashed' as const } },
+  axisLabel: { color: '#55555a', fontSize: 11 },
+  nameTextStyle: { color: '#55555a', fontSize: 11 },
+  splitLine: { lineStyle: { color: '#e2e2e8', type: 'dashed' as const } },
 }
 
 export const CHART_LEGEND = {
   icon: 'roundRect' as const,
   itemWidth: 16,
   itemHeight: 4,
-  textStyle: { color: '#57544c', fontSize: 12 },
+  textStyle: { color: '#3a3a3c', fontSize: 12 },
 }

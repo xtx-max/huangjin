@@ -488,11 +488,11 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 .count {
   font-size: 12px;
   font-weight: 400;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .attribution-tip {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .stats-row {
   margin-bottom: 20px;
@@ -506,7 +506,7 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .stat-label {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .stat-value {
   font-size: 30px;
@@ -517,7 +517,7 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .stat-sub {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
   margin-top: 4px;
 }
 .up {
@@ -541,11 +541,11 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
 }
 .event-date-sub {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .event-summary {
   font-size: 12px;
-  color: #57544c;
+  color: #3a3a3c;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

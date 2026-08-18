@@ -31,10 +31,13 @@ function fmtTime(epochSec: number): string {
   return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
 }
 
-function toQuote(raw: RawQuote | null | undefined, scale: number): LiveQuote | null {
+function toQuote(raw: RawQuote | null | undefined, scale: number, range: [number, number]): LiveQuote | null {
   if (!raw || raw.f43 === undefined || raw.f60 === undefined) return null
   const price = raw.f43 / scale
   const prevClose = raw.f60 / scale
+  // 拒绝非正值与不合理区间（收盘后接口可能返回 0，或比例异常）
+  if (price <= 0 || prevClose <= 0) return null
+  if (price < range[0] || price > range[1]) return null
   const change = price - prevClose
   return {
     price,
@@ -45,10 +48,10 @@ function toQuote(raw: RawQuote | null | undefined, scale: number): LiveQuote | n
   }
 }
 
-/** 单个 secid 请求；双主机(主站/延迟站)×重试，任一成功即返回。scale：接口价格放大倍数（COMEX ×10、上海金 ×100） */
+/** 单个 secid 请求；双主机(主站/延迟站)×重试，任一成功即返回。scale：接口价格放大倍数；range：合理价格区间 */
 const QUOTE_HOSTS = ['push2.eastmoney.com', 'push2delay.eastmoney.com']
 
-async function fetchOne(secid: string, scale: number): Promise<LiveQuote | null> {
+async function fetchOne(secid: string, scale: number, range: [number, number]): Promise<LiveQuote | null> {
   for (const host of QUOTE_HOSTS) {
     const url = `https://${host}/api/qt/stock/get?secid=${secid}&fields=${QUOTE_FIELDS}`
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -58,7 +61,7 @@ async function fetchOne(secid: string, scale: number): Promise<LiveQuote | null>
         const payload = (await resp.json()) as { data?: RawQuote | RawQuote[] }
         const data = payload.data
         const raw = Array.isArray(data) ? data[0] : data
-        const quote = toQuote(raw, scale)
+        const quote = toQuote(raw, scale, range)
         if (quote) return quote
         throw new Error('响应缺少行情字段')
       } catch {
@@ -73,8 +76,8 @@ async function fetchOne(secid: string, scale: number): Promise<LiveQuote | null>
 /** 两个品种并行拉取（任一失败不影响另一个，页面各自回退到日线数据） */
 export async function fetchLiveQuotes(): Promise<LiveQuotes> {
   const [intl, domestic] = await Promise.all([
-    fetchOne('101.GC00Y', 10),
-    fetchOne('118.Au9999', 100),
+    fetchOne('101.GC00Y', 10, [300, 20000]),
+    fetchOne('118.Au9999', 100, [50, 5000]),
   ])
   return { intl, domestic }
 }

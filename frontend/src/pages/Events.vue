@@ -330,7 +330,7 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 .count {
   font-size: 12px;
   font-weight: 400;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .header-controls {
   display: flex;
@@ -376,7 +376,7 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .live-meta {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .live-list {
   display: flex;
@@ -403,12 +403,12 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .live-item-meta {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
   margin-top: 2px;
 }
 .live-empty {
   font-size: 13px;
-  color: #8a877d;
+  color: #5b5b61;
   padding: 6px 0;
 }
 .year-group {
@@ -456,10 +456,10 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .event-region {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .event-summary {
   font-size: 13px;
-  color: #57544c;
+  color: #3a3a3c;
 }
 </style>

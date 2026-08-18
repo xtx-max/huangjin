@@ -118,11 +118,11 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .detail-date {
   font-size: 13px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .detail-region {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
 }
 .detail-summary-box {
   margin: 14px 0 18px;
@@ -132,7 +132,7 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
 }
 .summary-label {
   font-size: 12px;
-  color: #8a877d;
+  color: #5b5b61;
   display: block;
   margin-bottom: 4px;
 }
