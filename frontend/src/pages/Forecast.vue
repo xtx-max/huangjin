@@ -171,12 +171,16 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import { Compass, DataAnalysis, InfoFilled } from '@element-plus/icons-vue'
 import { loadGoldPrices } from '@/data/goldPrices'
+import { loadEvents } from '@/data/events'
+import { loadNews } from '@/data/news'
 import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { forecastSeries } from '@/utils/forecast'
 import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import { usePageMotion } from '@/composables/usePageMotion'
 
 const data = loadGoldPrices()
+const eventLib = loadEvents()
+const newsLib = loadNews()
 
 const pageRoot = ref<HTMLElement | null>(null)
 usePageMotion(pageRoot)
@@ -295,17 +299,119 @@ const analysisSections = computed<Section[]>(() => {
   const n = closes.length
   const last = closes[n - 1]
   const residRel = last > 0 ? (fc.value.residStd / last) * 100 : 0
+  const sections: Section[] = []
 
-  // 各时点：预测值 / 两模型分歧 / 区间宽度 / 该时点的历史参照
+  // ================= 宏观环境画像 =================
+  const macroParas: string[] = []
+  const sorted = [...closes].sort((a, b) => a - b)
+  const histHigh = sorted[sorted.length - 1]
+  const histLow = sorted[0]
+  const mean = closes.reduce((a, b) => a + b, 0) / n
+  let rank = 0
+  for (const v of sorted) if (v <= last) rank++
+  const percentile = (rank / n) * 100
+  macroParas.push(
+    `价格定位：当前 ${last.toFixed(2)} ${unit.value} 处于 ${seriesName.value} 全部历史（${n} 个交易日）的 ${percentile.toFixed(0)}% 分位——即有 ${percentile.toFixed(0)}% 的交易日低于现价。较历史最高 ${histHigh.toFixed(2)} 回撤 ${(((last - histHigh) / histHigh) * 100).toFixed(1)}%，较历史最低 ${histLow.toFixed(2)} 上涨 ${(((last - histLow) / histLow) * 100).toFixed(0)}%，较历史均值 ${mean.toFixed(2)} 高出 ${(((last - mean) / mean) * 100).toFixed(0)}%。${percentile >= 95 ? '当前处于历史极高位区域，意味着"均值回归"与"趋势延续"两种力量并存，波动通常放大。' : percentile >= 80 ? '当前处于历史高位区域，向上空间取决于趋势与事件催化。' : '当前处于历史中枢附近，定价环境相对均衡。'}`,
+  )
+  // 高位参照：收盘进入历史高点 95% 区域的交易日后 60 日表现
+  let hiCnt = 0, hiSum = 0, hiWins = 0
+  for (let i = 0; i + 60 < n; i++) {
+    if (closes[i] >= histHigh * 0.95) {
+      const fwd = ((closes[i + 60] - closes[i]) / closes[i]) * 100
+      hiCnt++; hiSum += fwd; if (fwd > 0) hiWins++
+    }
+  }
+  if (hiCnt > 0) {
+    macroParas.push(
+      `高位参照：历史上收盘价进入历史高点 95% 区域内的交易日共 ${hiCnt} 天，其后 60 个交易日平均涨跌 ${formatSigned(hiSum / hiCnt, 1)}%、上涨概率 ${((hiWins / hiCnt) * 100).toFixed(0)}%——该统计说明当前价位水平下，历史样本的后续表现分布。`,
+    )
+  }
+  // 年度涨幅排名
+  const byYear: Record<string, number[]> = {}
+  allSeries.value.forEach((p) => {
+    const y = p.date.slice(0, 4)
+    if (!byYear[y]) byYear[y] = []
+    byYear[y].push(p.close)
+  })
+  const yearReturns: Array<{ y: string; r: number }> = []
+  for (const y of Object.keys(byYear).sort()) {
+    const arr = byYear[y]
+    if (arr.length > 1) yearReturns.push({ y, r: ((arr[arr.length - 1] - arr[0]) / arr[0]) * 100 })
+  }
+  const ytd = (() => {
+    const arr = byYear[lastDate.value.slice(0, 4)] ?? []
+    return arr.length > 1 ? ((arr[arr.length - 1] - arr[0]) / arr[0]) * 100 : null
+  })()
+  if (ytd !== null && yearReturns.length > 0) {
+    const better = yearReturns.filter((x) => x.r < ytd).length
+    const pos = yearReturns.length - better
+    macroParas.push(
+      `年度表现：今年迄今（${lastDate.value.slice(0, 4)} 年）累计 ${formatSigned(ytd, 1)}%，在 ${yearReturns.length} 个完整年度中，当前年度涨幅可排第 ${pos} 位；历史上年度涨幅超过 ${Math.abs(ytd).toFixed(0)}% 的年份有 ${yearReturns.filter((x) => Math.abs(x.r) > Math.abs(ytd)).length} 个。`,
+    )
+  }
+  // 事件面
+  const recentEvents = eventLib.filter((e) => e.date >= '2023-01-01')
+  const posE = recentEvents.filter((e) => e.impact === '利好金价').length
+  const negE = recentEvents.filter((e) => e.impact === '利空金价').length
+  if (recentEvents.length > 0) {
+    const tilt = posE > negE ? '偏多' : posE < negE ? '偏空' : '均衡'
+    macroParas.push(
+      `事件面：事件库 2023 年以来收录重大事件 ${recentEvents.length} 件（利好 ${posE} / 利空 ${negE} / 中性 ${recentEvents.length - posE - negE}），整体${tilt}。近期标志性事件：${recentEvents.slice(-3).map((e) => e.title.split('：')[0]).join('、')}。事件面决定了金价的"风险溢价"底色：${tilt === '偏多' ? '地缘与信用叙事持续为金价提供支撑。' : tilt === '偏空' ? '事件面压制力量占优，需警惕溢价回吐。' : '事件面多空交织，波动来源分散。'}`,
+    )
+  }
+  // 消息面（标题关键词分类）
+  const newsSince = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10)
+  const recentNews = newsLib.filter((nn) => (nn.time || '').slice(0, 10) >= newsSince)
+  const POS_RE = /降息|购金|避险|冲突|战争|制裁|危机|新高|大涨|飙升|突破|刺激|宽松|QE|降准|增持/
+  const NEG_RE = /加息|鹰派|缩表|暴跌|抛售|崩盘|违约|爆雷|衰退|通缩|暂停增持|下调评级/
+  const posN = recentNews.filter((nn) => POS_RE.test(nn.title)).length
+  const negN = recentNews.filter((nn) => NEG_RE.test(nn.title)).length
+  if (recentNews.length > 0) {
+    macroParas.push(
+      `消息面：新闻库近 60 天收录快讯 ${recentNews.length} 条，按标题归类利好 ${posN} / 利空 ${negN} / 中性 ${recentNews.length - posN - negN}，市场情绪${posN > negN ? '偏暖' : posN < negN ? '偏冷' : '中性'}。`,
+    )
+  }
+  // 内外联动（隐含汇率口径）
+  const intlLast = data.internationalDaily[data.internationalDaily.length - 1].close
+  const intlRef = liveQuotes.value?.intl?.price ?? intlLast
+  if (intlRef > 0 && last > 0) {
+    const usdPerGram = intlRef / 31.1035
+    const impliedFx = last / usdPerGram
+    macroParas.push(
+      `内外联动：国际金价 ${intlRef.toFixed(2)} 美元/盎司折合 ${usdPerGram.toFixed(2)} 美元/克；国内 Au99.99 现价 ${last.toFixed(2)} 元/克对应隐含汇率 ${impliedFx.toFixed(2)} 元/美元（含税费与内外供需价差）。隐含汇率相对即期汇率的偏离即内外价差：溢价走阔通常对应内盘买需偏强、走弱情绪敏感，收窄则相反。`,
+    )
+  }
+  if (macroParas.length > 0) sections.push({ heading: '宏观环境画像', paragraphs: macroParas })
+
+  // ================= 各时点深度分析 =================
   const PERIODS = [
-    { key: 1, label: '明天', risk: '隔夜风险最大：国内金价开盘跟随隔夜国际盘与汇率，单一交易日噪声极高，该时点预测仅供参考。' },
-    { key: 5, label: '一周后', risk: '一周窗口内突发新闻（美联储官员讲话、地缘消息）可能造成跳空，短期预测容易被事件打断。' },
-    { key: 22, label: '一个月后', risk: '一个月窗口可能跨越美联储议息会议与重要经济数据，利率预期的变化是主要扰动源。' },
-    { key: 66, label: '三个月后', risk: '三个月窗口足以容纳一轮政策转向或地缘冲突的演化，趋势外推的失效概率明显上升。' },
-    { key: 126, label: '六个月后', risk: '六个月维度上基本面（实际利率、央行购金节奏、美元周期）可能整体漂移，模型外推仅代表"当前趋势不变"的假设情形。' },
+    { key: 1, label: '明天', risk: '隔夜风险最大：国内金价开盘跟随隔夜国际盘与汇率，单一交易日噪声极高，该时点预测仅供参考。', watch: '隔夜 COMEX 金价与人民币汇率决定次日开盘价；关注当日有无重要数据发布或官员讲话。' },
+    { key: 5, label: '一周后', risk: '一周窗口内突发新闻（美联储官员讲话、地缘消息）可能造成跳空，短期预测容易被事件打断。', watch: '本周美国通胀/就业数据与美联储官员讲话可能引发波动，注意 ETF/CFTC 持仓的边际变化。' },
+    { key: 22, label: '一个月后', risk: '一个月窗口可能跨越美联储议息会议与重要经济数据，利率预期的变化是主要扰动源。', watch: '该窗口大概率跨越美联储议息会议，利率路径预期是核心宏观变量；同时关注央行月度购金数据。' },
+    { key: 66, label: '三个月后', risk: '三个月窗口足以容纳一轮政策转向或地缘冲突的演化，趋势外推的失效概率明显上升。', watch: '关注全球央行购金季度数据、地缘局势演变与美元指数趋势，三者决定中期方向。' },
+    { key: 126, label: '六个月后', risk: '六个月维度上基本面（实际利率、央行购金节奏、美元周期）可能整体漂移，模型外推仅代表"当前趋势不变"的假设情形。', watch: '美元周期、实际利率中枢与央行购金节奏的持续性，是六个月维度的核心宏观主线。' },
   ]
 
-  const sections: Section[] = []
+  // 均线结构（全序列，与品种一致）
+  const MAS = [5, 10, 20, 60]
+  const maVals = MAS.map((d) => (n >= d ? closes.slice(-d).reduce((a, b) => a + b, 0) / d : null))
+  const maNames = ['5日', '10日', '20日', '60日']
+  const maText = maVals.map((v, i2) => (v !== null ? `${maNames[i2]}均线 ${v.toFixed(1)}` : '')).filter(Boolean).join('、')
+  const alignUp = maVals.every((v, i2) => i2 === 0 || v === null || maVals[i2 - 1] === null || (maVals[i2 - 1] as number) >= v)
+  const alignDown = maVals.every((v, i2) => i2 === 0 || v === null || maVals[i2 - 1] === null || (maVals[i2 - 1] as number) <= v)
+  const maState = alignUp ? '短均线整体位于长均线之上，呈多头排列，趋势结构对多头有利' : alignDown ? '短均线整体位于长均线之下，呈空头排列，趋势结构对空头有利' : '均线交织，趋势方向不清晰，行情更可能以震荡为主'
+
+  // 近端动能
+  const r5 = n > 5 ? ((last - closes[n - 6]) / closes[n - 6]) * 100 : null
+  const r10 = n > 10 ? ((last - closes[n - 11]) / closes[n - 11]) * 100 : null
+  let upStreak = 0
+  let iUp = n - 1
+  while (iUp > 0 && closes[iUp] > closes[iUp - 1]) { upStreak++; iUp-- }
+  let downStreak = 0
+  let iDn = n - 1
+  while (iDn > 0 && closes[iDn] < closes[iDn - 1]) { downStreak++; iDn-- }
+  const streakText = upStreak > 0 ? `已连涨 ${upStreak} 个交易日` : downStreak > 0 ? `已连跌 ${downStreak} 个交易日` : '近两日涨跌交替'
+
   for (const P of PERIODS) {
     const i = P.key - 1
     const reg = fc.value.reg[i]
@@ -317,22 +423,20 @@ const analysisSections = computed<Section[]>(() => {
     const width = price > 0 ? ((high - low) / price) * 100 : 0
     const divergence = price > 0 ? (Math.abs(reg - holt) / price) * 100 : 0
 
-    // 历史参照（该时点维度）：过去 H 日涨幅与当前接近的时期，其后 H 日实际表现
     const curRet = (() => {
       if (n <= P.key) return null
       return ((last - closes[n - P.key - 1]) / closes[n - P.key - 1]) * 100
     })()
-    let cnt = 0
-    let sum = 0
-    let wins = 0
+    let cnt = 0, sum = 0, wins = 0, best = -Infinity, worst = Infinity
     if (curRet !== null) {
       for (let j = P.key; j + P.key < n; j++) {
         const pastRet = ((closes[j] - closes[j - P.key]) / closes[j - P.key]) * 100
         if (Math.abs(pastRet - curRet) <= 1.5) {
           const fwd = ((closes[j + P.key] - closes[j]) / closes[j]) * 100
-          cnt++
-          sum += fwd
+          cnt++; sum += fwd
           if (fwd > 0) wins++
+          if (fwd > best) best = fwd
+          if (fwd < worst) worst = fwd
         }
       }
     }
@@ -344,14 +448,20 @@ const analysisSections = computed<Section[]>(() => {
       `预测值：${fc.value.dates[i]}（${P.label}），线性回归 ${reg.toFixed(2)} ${unit.value}、Holt 平滑 ${holt.toFixed(2)} ${unit.value}，两者均值 ${price.toFixed(2)} ${unit.value}，较当前 ${formatSigned(pctVal, 2)}%；90% 区间 ${low.toFixed(0)} ~ ${high.toFixed(0)} ${unit.value}（宽度 ${width.toFixed(0)}%）。`,
     )
     paras.push(
-      `模型依据：两模型分歧度 ${divergence.toFixed(1)}%（${divergence < 1 ? '分歧很小，结论一致性高' : divergence < 3 ? '分歧适中' : '分歧较大，方向判断需打折'}）；${P.key} 日维度的区间宽度 ${width.toFixed(0)}% 由残差波动 ${residRel.toFixed(1)}% 与步长共同决定，步长越长区间越宽。`,
+      `两模型分别解读：线性回归外推的是"区间平均趋势"，其斜率对应年化 ${formatSigned(annualSlope.value, 1)}%，代表慢变量；Holt 平滑（α=${fc.value.alpha}、β=${fc.value.beta}）对近端数据加权，代表近期节奏。${divergence < 1 ? `两模型相差仅 ${divergence.toFixed(1)}%，结论互相印证，可靠性相对较高。` : `两模型相差 ${divergence.toFixed(1)}%，说明"区间平均趋势"与"近期动能"存在张力，可将两者均值视为基准情形、区间视为波动范围。`}`,
     )
+    paras.push(`区间含义：${width.toFixed(0)}% 的区间宽度由历史残差波动 ${residRel.toFixed(1)}% 与预测步长共同决定——按历史统计，未来 ${P.key} 日价格约有 90% 的概率落在该区间内，约 5% 概率高于上沿、5% 低于下沿。步长越长、历史波动越大，区间越宽，这是不确定性随时间的自然放大。`)
     if (analogAvg !== null) {
       paras.push(
-        `历史参照（${P.label}维度）：历史上与当前近 ${P.key} 日动能（${formatSigned(curRet, 1)}%）相近的情形共 ${cnt} 次，其后 ${P.key} 个交易日平均 ${formatSigned(analogAvg, 1)}%，上涨概率 ${(analogWin ?? 0).toFixed(0)}%。`,
+        `历史参照（${P.label}维度）：历史上与当前近 ${P.key} 日动能（${formatSigned(curRet, 1)}%）相近的情形共 ${cnt} 次，其后 ${P.key} 个交易日平均 ${formatSigned(analogAvg, 1)}%，上涨概率 ${(analogWin ?? 0).toFixed(0)}%；其中最好情形 ${formatSigned(best, 1)}%、最差情形 ${formatSigned(worst, 1)}%——这组数据展示了同样动能条件下，历史结果的完整分布而非单点结论。`,
       )
     }
+    paras.push(`均线结构：${maText}。${maState}。`)
+    paras.push(`近端动能：近 5 日 ${formatSigned(r5, 1)}%、近 10 日 ${formatSigned(r10, 1)}%；${streakText}。`)
     paras.push(`时段风险：${P.risk}`)
+    paras.push(`宏观关注：${P.watch}`)
+    const conclusion = pctVal > 0.3 ? '模型倾向向上，但请以区间而非点值作为决策基准' : pctVal < -0.3 ? '模型倾向向下，同样请以区间为决策基准' : '模型倾向横盘震荡，方向不明时区间中轴参考价值有限'
+    paras.push(`结论：${P.label}（${fc.value.dates[i]}）模型预计 ${formatSigned(pctVal, 1)}%（均值口径），${conclusion}。`)
     sections.push({ heading: `${P.label}（${fc.value.dates[i]}）`, paragraphs: paras })
   }
 

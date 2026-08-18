@@ -68,8 +68,22 @@ def norm_row(date_str: str, o, h, lo, c) -> dict:
 
 
 def fetch_eastmoney() -> dict:
-    """东方财富 COMEX 黄金日K。fields2 顺序: 日期,开,收,高,低,量。"""
-    payload = http_get_json(EM_KLINE_URL)
+    """东方财富 COMEX 黄金日K。fields2 顺序: 日期,开,收,高,低,量。失败重试，最终失败返回空。"""
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            payload = http_get_json(EM_KLINE_URL)
+            data = payload.get("data") or {}
+            if not data.get("klines"):
+                raise RuntimeError("klines 为空")
+            break
+        except Exception as exc:
+            last_err = exc
+            print(f"  东方财富第 {attempt} 次失败（{exc}），等待重试…")
+            time.sleep(10 * attempt)
+    else:
+        print(f"  提示：东方财富不可用（{last_err}），将回退 Yahoo。")
+        return {}
     data = payload.get("data") or {}
     rows = {}
     for line in data.get("klines", []):
