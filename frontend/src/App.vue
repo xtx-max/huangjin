@@ -43,6 +43,21 @@
             </el-menu-item>
           </el-menu>
         </div>
+        <div class="header-quotes" v-if="headerQuotes.intl || headerQuotes.domestic">
+          <span v-if="headerQuotes.intl" class="quote-item">
+            国际 <b>{{ headerQuotes.intl.price.toFixed(2) }}</b>
+            <em :class="headerQuotes.intl.change >= 0 ? 'up' : 'down'">
+              {{ headerQuotes.intl.change >= 0 ? '+' : '' }}{{ headerQuotes.intl.changePct.toFixed(2) }}%
+            </em>
+          </span>
+          <span v-if="headerQuotes.domestic" class="quote-item">
+            国内 <b>{{ headerQuotes.domestic.price.toFixed(2) }}</b>
+            <em :class="headerQuotes.domestic.change >= 0 ? 'up' : 'down'">
+              {{ headerQuotes.domestic.change >= 0 ? '+' : '' }}{{ headerQuotes.domestic.changePct.toFixed(2) }}%
+            </em>
+          </span>
+          <span class="quote-time">{{ headerQuoteTime }}</span>
+        </div>
       </el-header>
       <el-main class="app-main">
         <router-view v-slot="{ Component }">
@@ -57,6 +72,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { useRoute } from 'vue-router'
 import { gsap } from 'gsap'
 import { prefersReducedMotion } from '@/composables/usePageMotion'
@@ -81,6 +97,7 @@ const appRoot = ref<HTMLElement | null>(null)
 let headerCtx: gsap.Context | null = null
 
 onMounted(() => {
+  refreshHeaderQuotes()
   if (!appRoot.value || prefersReducedMotion()) return
   headerCtx = gsap.context(() => {
     gsap.fromTo(
@@ -103,7 +120,28 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   headerCtx?.revert()
+  if (quoteTimer !== null) window.clearTimeout(quoteTimer)
 })
+
+// ---- 全站实时行情（头部）：打开即拉取，成功后 30 秒刷新，失败 10 秒快速重试 ----
+const headerQuotes = ref<LiveQuotes>({ intl: null, domestic: null })
+const headerQuoteTime = ref('')
+let quoteTimer: number | null = null
+
+function scheduleQuoteRefresh(ms: number) {
+  if (quoteTimer !== null) window.clearTimeout(quoteTimer)
+  quoteTimer = window.setTimeout(refreshHeaderQuotes, ms)
+}
+
+async function refreshHeaderQuotes() {
+  try {
+    headerQuotes.value = await fetchLiveQuotes()
+    headerQuoteTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+    scheduleQuoteRefresh(30000)
+  } catch {
+    scheduleQuoteRefresh(10000)
+  }
+}
 </script>
 
 <style>
@@ -203,6 +241,36 @@ html, body {
 .fade-leave-active {
   transition: opacity 0.2s ease;
 }
+.header-quotes {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  margin-left: 16px;
+}
+.quote-item b {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  font-variant-numeric: tabular-nums;
+}
+.quote-item em {
+  font-style: normal;
+  font-weight: 600;
+  margin-left: 4px;
+}
+.quote-item em.up {
+  color: #ff8178;
+}
+.quote-item em.down {
+  color: #5ce084;
+}
+.quote-time {
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
 .fade-enter-from {
   opacity: 0;
   transform: translateY(14px) scale(0.998);
@@ -213,6 +281,9 @@ html, body {
 
 /* 窄屏适配：头部两行布局，菜单可横向滑动，避免菜单项溢出屏幕 */
 @media (max-width: 768px) {
+  .header-quotes {
+    display: none;
+  }
   .app-header {
     height: auto;
     min-height: 64px;

@@ -173,12 +173,19 @@ const quotes = ref<LiveQuotes | null>(null)
 const quotesUpdatedAt = ref('')
 let quoteTimer: number | null = null
 
+function scheduleQuotes(ms: number) {
+  if (quoteTimer !== null) window.clearTimeout(quoteTimer)
+  quoteTimer = window.setTimeout(refreshQuotes, ms)
+}
+
 async function refreshQuotes() {
   try {
     quotes.value = await fetchLiveQuotes()
     quotesUpdatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+    scheduleQuotes(30000)
   } catch {
-    /* 网络失败时保留静态数据展示 */
+    /* 网络失败：10 秒后快速重试，保留已有数据展示 */
+    scheduleQuotes(10000)
   }
 }
 
@@ -368,7 +375,6 @@ onMounted(() => {
   renderChart()
   window.addEventListener('resize', handleResize)
   refreshQuotes()
-  quoteTimer = window.setInterval(refreshQuotes, 30000)
 })
 
 watch([series, range, highlightEventId], () => {

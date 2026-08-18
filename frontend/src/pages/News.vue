@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   DataAnalysis,
@@ -134,6 +134,16 @@ const selected = ref<NewsItem | null>(null)
 
 const pageRoot = ref<HTMLElement | null>(null)
 usePageMotion(pageRoot)
+
+// 打开页面即自动抓取实时快讯；之后每 5 分钟自动刷新一次（按钮可手动即时刷新）
+let liveTimer: number | null = null
+onMounted(() => {
+  fetchLiveNews()
+  liveTimer = window.setInterval(fetchLiveNews, 300000)
+})
+onBeforeUnmount(() => {
+  if (liveTimer !== null) window.clearInterval(liveTimer)
+})
 
 interface Section {
   heading: string

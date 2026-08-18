@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Flag, Refresh } from '@element-plus/icons-vue'
 import { loadEvents, type GoldEvent } from '@/data/events'
@@ -139,6 +139,16 @@ const events = loadEvents()
 
 const pageRoot = ref<HTMLElement | null>(null)
 usePageMotion(pageRoot)
+
+// 打开页面即自动抓取实时事件；之后每 5 分钟自动刷新一次（按钮可手动即时刷新）
+let liveTimer: number | null = null
+onMounted(() => {
+  fetchLiveEvents()
+  liveTimer = window.setInterval(fetchLiveEvents, 300000)
+})
+onBeforeUnmount(() => {
+  if (liveTimer !== null) window.clearInterval(liveTimer)
+})
 
 const categories = [...new Set(events.map((e) => e.category))]
 const impacts: Array<GoldEvent['impact']> = ['利好金价', '利空金价', '中性']

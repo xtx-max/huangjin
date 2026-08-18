@@ -45,22 +45,26 @@ function toQuote(raw: RawQuote | null | undefined, scale: number): LiveQuote | n
   }
 }
 
-/** 单个 secid 请求；失败重试一次。scale：接口价格放大倍数（COMEX ×10、上海金 ×100） */
+/** 单个 secid 请求；双主机(主站/延迟站)×重试，任一成功即返回。scale：接口价格放大倍数（COMEX ×10、上海金 ×100） */
+const QUOTE_HOSTS = ['push2.eastmoney.com', 'push2delay.eastmoney.com']
+
 async function fetchOne(secid: string, scale: number): Promise<LiveQuote | null> {
-  const url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${secid}&fields=${QUOTE_FIELDS}`
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const resp = await fetch(url)
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-      const payload = (await resp.json()) as { data?: RawQuote | RawQuote[] }
-      const data = payload.data
-      const raw = Array.isArray(data) ? data[0] : data
-      const quote = toQuote(raw, scale)
-      if (quote) return quote
-      throw new Error('响应缺少行情字段')
-    } catch {
-      if (attempt === 3) return null
-      await new Promise((r) => setTimeout(r, 900 * attempt))
+  for (const host of QUOTE_HOSTS) {
+    const url = `https://${host}/api/qt/stock/get?secid=${secid}&fields=${QUOTE_FIELDS}`
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const resp = await fetch(url)
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+        const payload = (await resp.json()) as { data?: RawQuote | RawQuote[] }
+        const data = payload.data
+        const raw = Array.isArray(data) ? data[0] : data
+        const quote = toQuote(raw, scale)
+        if (quote) return quote
+        throw new Error('响应缺少行情字段')
+      } catch {
+        if (attempt === 2) break
+        await new Promise((r) => setTimeout(r, 700))
+      }
     }
   }
   return null
