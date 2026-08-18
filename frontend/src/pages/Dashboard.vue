@@ -1,29 +1,15 @@
 <template>
   <div class="page" ref="pageRoot">
-    <!-- 最新行情 Hero（实时报价，30 秒自动刷新） -->
+    <!-- 实时行情 Hero（仅实时报价，无静态兜底） -->
     <div class="hero reveal">
       <div class="hero-head">
         <span class="hero-title">实时行情</span>
         <span class="hero-badge">
           <span class="live-dot"></span>
-          实时报价 · 约 1 分钟延迟 · {{ quotesUpdatedAt || '连接中…' }}
+          实时报价 · 约 1 分钟延迟 · {{ quotesUpdatedAt || '获取中…' }}
         </span>
       </div>
       <div class="hero-inner">
-        <div class="hero-col">
-          <div class="hero-label">
-            国际金价 XAU/USD
-            <el-tag size="small" effect="plain" class="hero-unit">美元/盎司</el-tag>
-          </div>
-          <div class="hero-price">{{ heroIntl.price }}</div>
-          <div class="hero-sub">
-            <span class="hero-pill" :class="changeClass(heroIntl.change)">
-              {{ formatSigned(heroIntl.change) }}（{{ formatSigned(heroIntl.changePct, 2) }}%）
-            </span>
-            <span class="hero-date">{{ heroIntl.note }}</span>
-          </div>
-        </div>
-        <div class="hero-divider"></div>
         <div class="hero-col">
           <div class="hero-label">
             国内金价 Au99.99
@@ -31,10 +17,24 @@
           </div>
           <div class="hero-price">{{ heroDomestic.price }}</div>
           <div class="hero-sub">
-            <span class="hero-pill" :class="changeClass(heroDomestic.change)">
+            <span v-if="heroDomestic.change !== null" class="hero-pill" :class="changeClass(heroDomestic.change)">
               {{ formatSigned(heroDomestic.change) }}（{{ formatSigned(heroDomestic.changePct, 2) }}%）
             </span>
             <span class="hero-date">{{ heroDomestic.note }}</span>
+          </div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-col">
+          <div class="hero-label">
+            国际金价 XAU/USD
+            <el-tag size="small" effect="plain" class="hero-unit">美元/盎司</el-tag>
+          </div>
+          <div class="hero-price">{{ heroIntl.price }}</div>
+          <div class="hero-sub">
+            <span v-if="heroIntl.change !== null" class="hero-pill" :class="changeClass(heroIntl.change)">
+              {{ formatSigned(heroIntl.change) }}（{{ formatSigned(heroIntl.changePct, 2) }}%）
+            </span>
+            <span class="hero-date">{{ heroIntl.note }}</span>
           </div>
         </div>
       </div>
@@ -53,8 +53,8 @@
           </div>
           <div class="chart-controls">
             <el-radio-group v-model="series" size="small">
-              <el-radio-button label="intl">国际金价</el-radio-button>
               <el-radio-button label="domestic">国内金价</el-radio-button>
+              <el-radio-button label="intl">国际金价</el-radio-button>
             </el-radio-group>
             <el-radio-group v-model="range" size="small" class="range-group">
               <el-radio-button label="1m">1月</el-radio-button>
@@ -122,8 +122,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import { Flag, TrendCharts } from '@element-plus/icons-vue'
-import { loadGoldPrices, type PricePoint } from '@/data/goldPrices'
-import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
+import { loadGoldPrices } from '@/data/goldPrices'
 import { loadEvents, type GoldEvent } from '@/data/events'
 import {
   buildMergedIntlSeries,
@@ -131,8 +130,9 @@ import {
   type ClosePoint,
   type EventStat,
 } from '@/utils/eventStats'
-import { usePageMotion } from '@/composables/usePageMotion'
+import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
+import { usePageMotion } from '@/composables/usePageMotion'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
@@ -144,31 +144,10 @@ usePageMotion(pageRoot)
 type SeriesKey = 'intl' | 'domestic'
 type RangeKey = '1m' | '6m' | '1y' | '5y' | 'all'
 
-const series = ref<SeriesKey>('intl')
+const series = ref<SeriesKey>('domestic')
 const range = ref<RangeKey>('1y')
 
-interface Stat {
-  close: number | null
-  change: number | null
-  changePct: number | null
-  date: string
-}
-
-function computeStat(points: PricePoint[]): Stat {
-  if (!points || points.length === 0) {
-    return { close: null, change: null, changePct: null, date: '' }
-  }
-  const last = points[points.length - 1]
-  const prev = points.length > 1 ? points[points.length - 2] : last
-  const change = last.close - prev.close
-  const changePct = prev.close !== 0 ? (change / prev.close) * 100 : null
-  return { close: last.close, change, changePct, date: last.date }
-}
-
-const intlStat = computed(() => computeStat(data.internationalDaily))
-const domesticStat = computed(() => computeStat(data.domestic))
-
-// ---- 实时报价（30 秒自动刷新；失败时回退到静态日线数据） ----
+// ---- 实时报价（仅实时；30 秒自动刷新，失败 10 秒重试） ----
 const quotes = ref<LiveQuotes | null>(null)
 const quotesUpdatedAt = ref('')
 let quoteTimer: number | null = null
@@ -184,7 +163,6 @@ async function refreshQuotes() {
     quotesUpdatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
     scheduleQuotes(30000)
   } catch {
-    /* 网络失败：10 秒后快速重试，保留已有数据展示 */
     scheduleQuotes(10000)
   }
 }
@@ -196,22 +174,30 @@ interface HeroStat {
   note: string
 }
 
-const heroIntl = computed<HeroStat>(() => {
-  const q = quotes.value?.intl
-  if (q) {
-    return { price: q.price.toFixed(2), change: q.change, changePct: q.changePct, note: `行情时间 ${q.time} · 实时` }
-  }
-  const st = intlStat.value
-  return { price: formatPrice(st.close), change: st.change, changePct: st.changePct, note: `截至 ${st.date} · 日线` }
-})
-
 const heroDomestic = computed<HeroStat>(() => {
   const q = quotes.value?.domestic
   if (q) {
-    return { price: q.price.toFixed(2), change: q.change, changePct: q.changePct, note: `行情时间 ${q.time} · 实时` }
+    return {
+      price: q.price.toFixed(2),
+      change: q.change,
+      changePct: q.changePct,
+      note: `行情时间 ${q.time} · 实时`,
+    }
   }
-  const st = domesticStat.value
-  return { price: formatPrice(st.close), change: st.change, changePct: st.changePct, note: `截至 ${st.date} · 日线` }
+  return { price: '获取中…', change: null, changePct: null, note: '正在获取实时报价，约 1-2 秒' }
+})
+
+const heroIntl = computed<HeroStat>(() => {
+  const q = quotes.value?.intl
+  if (q) {
+    return {
+      price: q.price.toFixed(2),
+      change: q.change,
+      changePct: q.changePct,
+      note: `行情时间 ${q.time} · 实时`,
+    }
+  }
+  return { price: '获取中…', change: null, changePct: null, note: '正在获取实时报价，约 1-2 秒' }
 })
 
 // 国际合并序列与事件涨跌幅统计（共享工具）
@@ -302,15 +288,13 @@ function renderChart() {
   const dates = points.map((p) => p.date)
   const option: echarts.EChartsOption = {
     animationDuration: 900,
-
     animationEasing: 'cubicOut',
-
     animationDurationUpdate: 600,
-
     animationEasingUpdate: 'cubicOut',
-
     grid: { left: 60, right: 24, top: 24, bottom: 48 },
-    tooltip: { ...CHART_TOOLTIP, trigger: 'axis',
+    tooltip: {
+      ...CHART_TOOLTIP,
+      trigger: 'axis',
       formatter: (params: unknown) => {
         const list = params as Array<{ axisValue: string; data: number }>
         const p = list[0]
@@ -326,11 +310,11 @@ function renderChart() {
         data: points.map((p) => p.close),
         showSymbol: false,
         smooth: false,
-        lineStyle: { width: 2, color: '#b08a3e' },
+        lineStyle: { width: 2.5, color: '#b08a3e' },
         itemStyle: { color: '#b08a3e' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(176, 138, 62, 0.25)' },
+            { offset: 0, color: 'rgba(176, 138, 62, 0.22)' },
             { offset: 1, color: 'rgba(176, 138, 62, 0.02)' },
           ]),
         },
@@ -383,16 +367,12 @@ watch([series, range, highlightEventId], () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
-  if (quoteTimer !== null) window.clearInterval(quoteTimer)
+  if (quoteTimer !== null) window.clearTimeout(quoteTimer)
   chart?.dispose()
   chart = null
 })
 
 // ---- 格式化 ----
-function formatPrice(v: number | null): string {
-  return v === null ? '--' : v.toFixed(2)
-}
-
 function formatSigned(v: number | null, digits = 2): string {
   if (v === null) return '--'
   return `${v > 0 ? '+' : ''}${v.toFixed(digits)}`
@@ -530,18 +510,6 @@ function changeClass(v: number | null): string {
 .down {
   color: #5ce084;
 }
-@media (max-width: 768px) {
-  .hero-inner {
-    flex-direction: column;
-    gap: 20px;
-  }
-  .hero-divider {
-    display: none;
-  }
-  .hero-price {
-    font-size: 40px;
-  }
-}
 .chart-card {
   border: none;
   border-radius: 16px;
@@ -560,9 +528,10 @@ function changeClass(v: number | null): string {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
-  color: #2b2924;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
   flex-wrap: wrap;
 }
 .chart-controls {
@@ -590,11 +559,18 @@ function changeClass(v: number | null): string {
   color: #8a877d;
 }
 @media (max-width: 768px) {
+  .hero-inner {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .hero-divider {
+    display: none;
+  }
+  .hero-price {
+    font-size: 40px;
+  }
   .chart {
     height: 300px;
-  }
-  .stat-price {
-    font-size: 24px;
   }
 }
 </style>

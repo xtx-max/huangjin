@@ -43,20 +43,23 @@
             </el-menu-item>
           </el-menu>
         </div>
-        <div class="header-quotes" v-if="headerQuotes.intl || headerQuotes.domestic">
-          <span v-if="headerQuotes.intl" class="quote-item">
-            国际 <b>{{ headerQuotes.intl.price.toFixed(2) }}</b>
-            <em :class="headerQuotes.intl.change >= 0 ? 'up' : 'down'">
-              {{ headerQuotes.intl.change >= 0 ? '+' : '' }}{{ headerQuotes.intl.changePct.toFixed(2) }}%
-            </em>
-          </span>
+        <div class="header-quotes" v-if="headerQuotes.domestic || headerQuotes.intl">
           <span v-if="headerQuotes.domestic" class="quote-item">
             国内 <b>{{ headerQuotes.domestic.price.toFixed(2) }}</b>
             <em :class="headerQuotes.domestic.change >= 0 ? 'up' : 'down'">
               {{ headerQuotes.domestic.change >= 0 ? '+' : '' }}{{ headerQuotes.domestic.changePct.toFixed(2) }}%
             </em>
           </span>
+          <span v-if="headerQuotes.intl" class="quote-item">
+            国际 <b>{{ headerQuotes.intl.price.toFixed(2) }}</b>
+            <em :class="headerQuotes.intl.change >= 0 ? 'up' : 'down'">
+              {{ headerQuotes.intl.change >= 0 ? '+' : '' }}{{ headerQuotes.intl.changePct.toFixed(2) }}%
+            </em>
+          </span>
           <span class="quote-time">{{ headerQuoteTime }}</span>
+        </div>
+        <div class="header-quotes" v-else>
+          <span class="quote-item quote-loading">行情获取中…</span>
         </div>
       </el-header>
       <el-main class="app-main">
@@ -269,6 +272,9 @@ html, body {
 .quote-time {
   color: rgba(255, 255, 255, 0.4);
   font-variant-numeric: tabular-nums;
+}
+.quote-loading {
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .fade-enter-from {

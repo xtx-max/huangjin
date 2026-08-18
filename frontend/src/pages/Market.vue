@@ -117,7 +117,7 @@ usePageMotion(pageRoot)
 
 type ModeKey = 'intl' | 'domestic' | 'monthly'
 
-const mode = ref<ModeKey>('intl')
+const mode = ref<ModeKey>('domestic')
 const range = ref<[string, string] | null>(null)
 const page = ref(1)
 
