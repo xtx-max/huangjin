@@ -22,12 +22,7 @@
         <p class="detail-summary">{{ event.summary }}</p>
       </div>
       <div class="detail-analysis-title">深度分析</div>
-      <div class="analysis-body">
-        <template v-for="(sec, i) in analysisSections" :key="i">
-          <div v-if="sec.heading" class="sec-heading">{{ sec.heading }}</div>
-          <p v-for="(para, j) in sec.paragraphs" :key="j" class="sec-para">{{ para }}</p>
-        </template>
-      </div>
+      <AnalysisSections :sections="analysisSections" />
     </template>
     <template #footer>
       <el-button @click="visible = false">关闭</el-button>
@@ -38,6 +33,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { GoldEvent } from '@/data/events'
+import AnalysisSections from '@/components/AnalysisSections.vue'
+import { parseSections } from '@/utils/analysisText'
 
 const props = defineProps<{
   event: GoldEvent | null
@@ -53,36 +50,7 @@ const visible = computed({
   set: (v: boolean) => emit('update:modelValue', v),
 })
 
-interface Section {
-  heading: string
-  paragraphs: string[]
-}
-
-/** 把 analysis 按【小节标题】拆分为带标题的段落组；无标题则整体作为正文 */
-const analysisSections = computed<Section[]>(() => {
-  const text = props.event?.analysis ?? ''
-  const lines = text.split(/\r?\n/)
-  const sections: Section[] = []
-  let current: Section = { heading: '', paragraphs: [] }
-  const headingRe = /^【([^】]{1,12})】\s*$/
-  const flush = () => {
-    if (current.heading || current.paragraphs.length > 0) sections.push(current)
-    current = { heading: '', paragraphs: [] }
-  }
-  for (const raw of lines) {
-    const line = raw.trim()
-    if (!line) continue
-    const m = headingRe.exec(line)
-    if (m) {
-      flush()
-      current = { heading: m[1], paragraphs: [] }
-    } else {
-      current.paragraphs.push(line)
-    }
-  }
-  flush()
-  return sections
-})
+const analysisSections = computed(() => parseSections(props.event?.analysis ?? ''))
 
 // 利好金价=红、利空金价=绿、中性=灰（国内习惯）
 function impactTagType(impact: string): 'danger' | 'success' | 'info' {
@@ -148,28 +116,5 @@ function categoryTagType(category: string): 'primary' | 'success' | 'warning' | 
   color: #1d1d1f;
   letter-spacing: -0.01em;
   margin-bottom: 12px;
-}
-.analysis-body {
-  max-height: 62vh;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-.sec-heading {
-  font-size: 15px;
-  font-weight: 700;
-  color: #8a6d1f;
-  margin: 18px 0 8px;
-  letter-spacing: -0.01em;
-}
-.sec-heading:first-child {
-  margin-top: 0;
-}
-.sec-para {
-  margin: 0 0 12px;
-  font-size: 15px;
-  color: #1d1d1f;
-  line-height: 2;
-  text-align: justify;
-  white-space: pre-wrap;
 }
 </style>

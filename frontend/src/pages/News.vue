@@ -97,12 +97,7 @@
               <el-icon><DataAnalysis /></el-icon>
               <span>影响分析</span>
             </div>
-            <div class="analysis-sections">
-              <template v-for="(sec, i) in analysisSections" :key="i">
-                <div v-if="sec.heading" class="sec-heading">{{ sec.heading }}</div>
-                <p v-for="(para, j) in sec.paragraphs" :key="j" class="analysis-text">{{ para }}</p>
-              </template>
-            </div>
+            <AnalysisSections :sections="analysisSections" />
           </div>
         </template>
         <template #footer>
@@ -126,6 +121,8 @@ import {
 import { loadNews, type NewsItem } from '@/data/news'
 import { classifyEvent } from '@/utils/eventClassify'
 import { buildAutoAnalysis } from '@/utils/autoAnalysis'
+import AnalysisSections from '@/components/AnalysisSections.vue'
+import { parseSections } from '@/utils/analysisText'
 import { usePageMotion } from '@/composables/usePageMotion'
 
 const items = loadNews()
@@ -145,36 +142,7 @@ onBeforeUnmount(() => {
   if (liveTimer !== null) window.clearInterval(liveTimer)
 })
 
-interface Section {
-  heading: string
-  paragraphs: string[]
-}
-
-/** 把 analysis 按【小节标题】拆分渲染 */
-const analysisSections = computed<Section[]>(() => {
-  const text = selected.value?.analysis ?? ''
-  const lines = text.split(/\r?\n/)
-  const sections: Section[] = []
-  let current: Section = { heading: '', paragraphs: [] }
-  const headingRe = /^【([^】]{1,14})】\s*$/
-  const flush = () => {
-    if (current.heading || current.paragraphs.length > 0) sections.push(current)
-    current = { heading: '', paragraphs: [] }
-  }
-  for (const raw of lines) {
-    const line = raw.trim()
-    if (!line) continue
-    const m = headingRe.exec(line)
-    if (m) {
-      flush()
-      current = { heading: m[1], paragraphs: [] }
-    } else {
-      current.paragraphs.push(line)
-    }
-  }
-  flush()
-  return sections
-})
+const analysisSections = computed(() => parseSections(selected.value?.analysis ?? ''))
 
 // ---- 实时快讯（东方财富公开接口，CORS 开放，无需密钥；双源回退） ----
 const LIVE_SEARCH_API =
@@ -494,26 +462,5 @@ function impactTagType(impact: string): 'danger' | 'success' | 'info' {
   gap: 6px;
   color: #8a6d1f;
   margin-bottom: 8px;
-}
-.analysis-sections {
-  max-height: 46vh;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-.sec-heading {
-  font-size: 13px;
-  font-weight: 700;
-  color: #8a6d1f;
-  margin: 10px 0 4px;
-}
-.sec-heading:first-child {
-  margin-top: 0;
-}
-.analysis-text {
-  margin: 0 0 8px;
-  font-size: 14px;
-  color: #5f5030;
-  line-height: 1.9;
-  text-align: justify;
 }
 </style>

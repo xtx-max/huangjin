@@ -79,12 +79,7 @@
           <el-icon><DataAnalysis /></el-icon>
           <span>预测详细分析</span>
         </div>
-        <div class="analysis-sections">
-          <template v-for="(sec, i) in analysisSections" :key="i">
-            <div v-if="sec.heading" class="sec-heading">{{ sec.heading }}</div>
-            <p v-for="(para, j) in sec.paragraphs" :key="j" class="sec-para">{{ para }}</p>
-          </template>
-        </div>
+        <AnalysisSections :sections="analysisSections" />
       </div>
 
       <!-- 指标卡片 -->
@@ -177,6 +172,7 @@ import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { forecastSeries } from '@/utils/forecast'
 import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import { usePageMotion } from '@/composables/usePageMotion'
+import AnalysisSections from '@/components/AnalysisSections.vue'
 
 const data = loadGoldPrices()
 const eventLib = loadEvents()
@@ -778,22 +774,6 @@ function changeClass(v: number | null): string {
   color: #1d1d1f;
   letter-spacing: -0.01em;
   margin-bottom: 14px;
-}
-.sec-heading {
-  font-size: 14px;
-  font-weight: 700;
-  color: #8a6d1f;
-  margin: 14px 0 6px;
-}
-.sec-heading:first-child {
-  margin-top: 0;
-}
-.sec-para {
-  margin: 0 0 8px;
-  font-size: 14px;
-  color: #1d1d1f;
-  line-height: 2;
-  text-align: justify;
 }
 .stats-row {
   margin-bottom: 20px;
