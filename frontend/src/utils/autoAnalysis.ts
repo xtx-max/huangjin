@@ -128,7 +128,15 @@ export function buildAutoAnalysis(input: AutoAnalysisInput): string {
       ? '（20 日均线数据不足）'
       : `现价位于 20 日均线${ctx.vsMa20 >= 0 ? '上方' : '下方'} ${Math.abs(ctx.vsMa20).toFixed(1)}%`
 
+  const verdictLine =
+    input.impact === '利好金价'
+      ? `本条对金价的影响：利好金价。理由：${IMPACT_NOTE[input.impact].slice(0, 40)}`
+      : input.impact === '利空金价'
+        ? `本条对金价的影响：利空金价。理由：${IMPACT_NOTE[input.impact].slice(0, 40)}`
+        : '本条对金价的影响：中性。方向取决于后续细节与利率、美元走势。'
   return [
+    '【对金价的影响判断】',
+    `${verdictLine}（详细传导机制见下文）`,
     '【事件概要】',
     `${input.title}（${input.source}，${input.date}）。${input.summary} 本条为实时抓取的全球事件，事件全貌仍在演进中，以上为公开快讯信息，后续细节可能变化。`,
     '【当前市场背景（真实数据）】',

@@ -1,42 +1,44 @@
 <template>
   <div class="page" ref="pageRoot">
-    <!-- 最新行情卡片 -->
-    <el-row :gutter="16" class="stats-row reveal">
-      <el-col :xs="24" :sm="12">
-        <el-card shadow="never" class="stat-card">
-          <div class="stat-title">
-            <el-icon><Coin /></el-icon>
-            <span>国际金价 XAU/USD</span>
-            <el-tag size="small" type="warning" effect="plain">美元/盎司</el-tag>
+    <!-- 最新行情 Hero（实时报价，30 秒自动刷新） -->
+    <div class="hero reveal">
+      <div class="hero-head">
+        <span class="hero-title">实时行情</span>
+        <span class="hero-badge">
+          <span class="live-dot"></span>
+          实时报价 · 约 1 分钟延迟 · {{ quotesUpdatedAt || '连接中…' }}
+        </span>
+      </div>
+      <div class="hero-inner">
+        <div class="hero-col">
+          <div class="hero-label">
+            国际金价 XAU/USD
+            <el-tag size="small" effect="plain" class="hero-unit">美元/盎司</el-tag>
           </div>
-          <div class="stat-main">
-            <span class="stat-price motion-count" :data-value="intlStat.close ?? undefined" data-decimals="2">{{ formatPrice(intlStat.close) }}</span>
-            <span class="stat-change" :class="changeClass(intlStat.change)">
-              {{ formatSigned(intlStat.change) }}
-              <span class="stat-pct">({{ formatSigned(intlStat.changePct, 2) }}%)</span>
+          <div class="hero-price">{{ heroIntl.price }}</div>
+          <div class="hero-sub">
+            <span class="hero-pill" :class="changeClass(heroIntl.change)">
+              {{ formatSigned(heroIntl.change) }}（{{ formatSigned(heroIntl.changePct, 2) }}%）
             </span>
+            <span class="hero-date">{{ heroIntl.note }}</span>
           </div>
-          <div class="stat-date">截至 {{ intlStat.date || '--' }}</div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :sm="12">
-        <el-card shadow="never" class="stat-card">
-          <div class="stat-title">
-            <el-icon><Coin /></el-icon>
-            <span>国内金价 Au99.99</span>
-            <el-tag size="small" type="success" effect="plain">元/克</el-tag>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-col">
+          <div class="hero-label">
+            国内金价 Au99.99
+            <el-tag size="small" effect="plain" class="hero-unit">元/克</el-tag>
           </div>
-          <div class="stat-main">
-            <span class="stat-price motion-count" :data-value="domesticStat.close ?? undefined" data-decimals="2">{{ formatPrice(domesticStat.close) }}</span>
-            <span class="stat-change" :class="changeClass(domesticStat.change)">
-              {{ formatSigned(domesticStat.change) }}
-              <span class="stat-pct">({{ formatSigned(domesticStat.changePct, 2) }}%)</span>
+          <div class="hero-price">{{ heroDomestic.price }}</div>
+          <div class="hero-sub">
+            <span class="hero-pill" :class="changeClass(heroDomestic.change)">
+              {{ formatSigned(heroDomestic.change) }}（{{ formatSigned(heroDomestic.changePct, 2) }}%）
             </span>
+            <span class="hero-date">{{ heroDomestic.note }}</span>
           </div>
-          <div class="stat-date">截至 {{ domesticStat.date || '--' }}</div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
 
     <!-- 走势图（国际视图含事件标注） -->
     <el-card shadow="never" class="chart-card reveal">
@@ -119,8 +121,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
-import { Coin, Flag, TrendCharts } from '@element-plus/icons-vue'
+import { Flag, TrendCharts } from '@element-plus/icons-vue'
 import { loadGoldPrices, type PricePoint } from '@/data/goldPrices'
+import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { loadEvents, type GoldEvent } from '@/data/events'
 import {
   buildMergedIntlSeries,
@@ -129,6 +132,7 @@ import {
   type EventStat,
 } from '@/utils/eventStats'
 import { usePageMotion } from '@/composables/usePageMotion'
+import { CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
@@ -163,6 +167,45 @@ function computeStat(points: PricePoint[]): Stat {
 
 const intlStat = computed(() => computeStat(data.internationalDaily))
 const domesticStat = computed(() => computeStat(data.domestic))
+
+// ---- 实时报价（30 秒自动刷新；失败时回退到静态日线数据） ----
+const quotes = ref<LiveQuotes | null>(null)
+const quotesUpdatedAt = ref('')
+let quoteTimer: number | null = null
+
+async function refreshQuotes() {
+  try {
+    quotes.value = await fetchLiveQuotes()
+    quotesUpdatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  } catch {
+    /* 网络失败时保留静态数据展示 */
+  }
+}
+
+interface HeroStat {
+  price: string
+  change: number | null
+  changePct: number | null
+  note: string
+}
+
+const heroIntl = computed<HeroStat>(() => {
+  const q = quotes.value?.intl
+  if (q) {
+    return { price: q.price.toFixed(2), change: q.change, changePct: q.changePct, note: `行情时间 ${q.time} · 实时` }
+  }
+  const st = intlStat.value
+  return { price: formatPrice(st.close), change: st.change, changePct: st.changePct, note: `截至 ${st.date} · 日线` }
+})
+
+const heroDomestic = computed<HeroStat>(() => {
+  const q = quotes.value?.domestic
+  if (q) {
+    return { price: q.price.toFixed(2), change: q.change, changePct: q.changePct, note: `行情时间 ${q.time} · 实时` }
+  }
+  const st = domesticStat.value
+  return { price: formatPrice(st.close), change: st.change, changePct: st.changePct, note: `截至 ${st.date} · 日线` }
+})
 
 // 国际合并序列与事件涨跌幅统计（共享工具）
 const mergedIntl = buildMergedIntlSeries(data)
@@ -260,16 +303,15 @@ function renderChart() {
     animationEasingUpdate: 'cubicOut',
 
     grid: { left: 60, right: 24, top: 24, bottom: 48 },
-    tooltip: {
-      trigger: 'axis',
+    tooltip: { ...CHART_TOOLTIP, trigger: 'axis',
       formatter: (params: unknown) => {
         const list = params as Array<{ axisValue: string; data: number }>
         const p = list[0]
         return `${p.axisValue}<br/>${seriesName.value}：${p.data.toFixed(2)} ${unit.value}`
       },
     },
-    xAxis: { type: 'category', data: dates, boundaryGap: false },
-    yAxis: { type: 'value', scale: true, name: unit.value },
+    xAxis: { ...CHART_X, type: 'category', data: dates },
+    yAxis: { ...CHART_Y, type: 'value', scale: true, name: unit.value },
     series: [
       {
         name: seriesName.value,
@@ -325,6 +367,8 @@ function handleResize() {
 onMounted(() => {
   renderChart()
   window.addEventListener('resize', handleResize)
+  refreshQuotes()
+  quoteTimer = window.setInterval(refreshQuotes, 30000)
 })
 
 watch([series, range, highlightEventId], () => {
@@ -333,6 +377,7 @@ watch([series, range, highlightEventId], () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  if (quoteTimer !== null) window.clearInterval(quoteTimer)
   chart?.dispose()
   chart = null
 })
@@ -359,54 +404,137 @@ function changeClass(v: number | null): string {
 .page {
   padding: 12px 0 48px;
 }
-.stats-row {
-  margin-bottom: 20px;
+.hero {
+  background: linear-gradient(135deg, #1c1a16 0%, #2b2721 60%, #38322a 100%);
+  border-radius: 20px;
+  padding: 26px 32px 30px;
+  color: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
 }
-.stat-card {
-  border: none;
-  border-radius: 18px;
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -80px;
+  top: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(217, 178, 95, 0.16), transparent 70%);
+  pointer-events: none;
 }
-.stat-card :deep(.el-card__body) {
-  padding: 22px 26px;
-}
-.stat-title {
+.hero-head {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #6e6e73;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
 }
-.stat-main {
+.hero-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #d9b25f;
+}
+.hero-badge {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-top: 12px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
 }
-.stat-price {
-  font-size: 40px;
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34c759;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+.hero-inner {
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
+}
+.hero-col {
+  flex: 1;
+  min-width: 0;
+}
+.hero-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.hero-unit {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.hero-price {
+  font-size: 54px;
   font-weight: 600;
   letter-spacing: -0.03em;
-  color: #1d1d1f;
-  line-height: 1.1;
+  line-height: 1.15;
+  color: #f7f3ea;
+  font-variant-numeric: tabular-nums;
+  margin-top: 8px;
 }
-.stat-change {
-  font-size: 16px;
-  font-weight: 500;
+.hero-sub {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
 }
-.stat-pct {
+.hero-pill {
+  padding: 4px 12px;
+  border-radius: 980px;
   font-size: 13px;
-  opacity: 0.85;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+.hero-pill.up {
+  background: rgba(255, 69, 58, 0.18);
+  color: #ff8178;
+}
+.hero-pill.down {
+  background: rgba(52, 199, 89, 0.18);
+  color: #5ce084;
+}
+.hero-date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.hero-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.12);
 }
 .up {
-  color: #c65f57;
+  color: #ff8178;
 }
 .down {
-  color: #5a9167;
+  color: #5ce084;
 }
-.stat-date {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #8a877d;
+@media (max-width: 768px) {
+  .hero-inner {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .hero-divider {
+    display: none;
+  }
+  .hero-price {
+    font-size: 40px;
+  }
 }
 .chart-card {
   border: none;
@@ -439,7 +567,7 @@ function changeClass(v: number | null): string {
 }
 .chart {
   width: 100%;
-  height: 440px;
+  height: 460px;
 }
 .impact-tip {
   font-size: 12px;

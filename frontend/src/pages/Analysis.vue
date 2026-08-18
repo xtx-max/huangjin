@@ -130,6 +130,7 @@ import {
   type EventStat,
 } from '@/utils/eventStats'
 import { usePageMotion } from '@/composables/usePageMotion'
+import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import EventDetailDialog from '@/components/EventDetailDialog.vue'
 
 const data = loadGoldPrices()
@@ -321,9 +322,8 @@ function renderCharts() {
     animationEasingUpdate: 'cubicOut',
 
     grid: { left: 60, right: 24, top: 40, bottom: 44 },
-    legend: { data: ['收盘价', 'MA20', 'MA60', 'MA120'], top: 4 },
-    tooltip: {
-      trigger: 'axis',
+    legend: { ...CHART_LEGEND, data: ['收盘价', 'MA20', 'MA60', 'MA120'], top: 4 },
+    tooltip: { ...CHART_TOOLTIP, trigger: 'axis',
       formatter: (params: unknown) => {
         const list = params as Array<{ seriesName: string; axisValue: string; data: number | null }>
         const lines = list
@@ -332,8 +332,8 @@ function renderCharts() {
         return `${list[0]?.axisValue ?? ''}<br/>${lines.join('<br/>')}`
       },
     },
-    xAxis: { type: 'category', data: dates, boundaryGap: false },
-    yAxis: { type: 'value', scale: true, name: '美元/盎司' },
+    xAxis: { ...CHART_X, type: 'category', data: dates },
+    yAxis: { ...CHART_Y, type: 'value', scale: true, name: '美元/盎司' },
     series: [
       {
         name: '收盘价', type: 'line', data: a.points.map((p) => p.close),
@@ -392,15 +392,14 @@ function renderCharts() {
       animationEasingUpdate: 'cubicOut',
 
       grid: { left: 60, right: 24, top: 20, bottom: 44 },
-      tooltip: {
-        trigger: 'axis',
+      tooltip: { ...CHART_TOOLTIP, trigger: 'axis',
         formatter: (params: unknown) => {
           const list = params as Array<{ axisValue: string; data: number }>
           return `${list[0]?.axisValue ?? ''}<br/>回撤：${list[0]?.data.toFixed(2) ?? '--'}%`
         },
       },
-      xAxis: { type: 'category', data: dates, boundaryGap: false },
-      yAxis: { type: 'value', name: '回撤 %', max: 0 },
+      xAxis: { ...CHART_X, type: 'category', data: dates },
+      yAxis: { ...CHART_Y, type: 'value', name: '回撤 %', max: 0 },
       series: [
         {
           name: '回撤', type: 'line', data: a.ddPct, showSymbol: false,

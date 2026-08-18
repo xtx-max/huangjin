@@ -130,6 +130,7 @@ import * as echarts from 'echarts'
 import { Compass, InfoFilled } from '@element-plus/icons-vue'
 import { loadGoldPrices } from '@/data/goldPrices'
 import { usePageMotion } from '@/composables/usePageMotion'
+import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import { forecastSeries } from '@/utils/forecast'
 
 const data = loadGoldPrices()
@@ -215,9 +216,8 @@ function renderChart() {
       animationEasingUpdate: 'cubicOut',
 
       grid: { left: 60, right: 24, top: 40, bottom: 44 },
-      legend: { data: ['历史收盘', '线性回归预测', 'Holt 预测', '90% 预测区间'], top: 4 },
-      tooltip: {
-        trigger: 'axis',
+      legend: { ...CHART_LEGEND, data: ['历史收盘', '线性回归预测', 'Holt 预测', '90% 预测区间'], top: 4 },
+      tooltip: { ...CHART_TOOLTIP, trigger: 'axis',
         formatter: (params: unknown) => {
           const list = params as Array<{ seriesName: string; axisValue: string; data: number | null }>
           const lines = list
@@ -226,8 +226,8 @@ function renderChart() {
           return `${list[0]?.axisValue ?? ''}<br/>${lines.join('<br/>')}`
         },
       },
-      xAxis: { type: 'category', data: allDates, boundaryGap: false },
-      yAxis: { type: 'value', scale: true, name: '美元/盎司' },
+      xAxis: { ...CHART_X, type: 'category', data: allDates },
+      yAxis: { ...CHART_Y, type: 'value', scale: true, name: '美元/盎司' },
       series: [
         {
           name: '历史收盘', type: 'line', data: padHist(hist, allDates.length),
