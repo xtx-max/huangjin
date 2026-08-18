@@ -134,16 +134,16 @@ def read_token() -> str:
     if env_token:
         return env_token
     if not os.path.exists(ENV_PATH):
-        print("错误：未找到 .env 文件，请先创建并写入 TUSHARE_TOKEN=xxx", file=sys.stderr)
-        sys.exit(1)
+        print("提示：未配置 TUSHARE_TOKEN（.env 或环境变量），跳过国内金价更新。", file=sys.stderr)
+        sys.exit(0)
     token = ""
     for line in open(ENV_PATH, encoding="utf-8"):
         line = line.strip()
         if line.startswith("TUSHARE_TOKEN="):
             token = line.split("=", 1)[1].strip()
     if not token:
-        print("错误：.env 中未找到 TUSHARE_TOKEN", file=sys.stderr)
-        sys.exit(1)
+        print("提示：.env 中未找到 TUSHARE_TOKEN，跳过国内金价更新。", file=sys.stderr)
+        sys.exit(0)
     return token
 
 
@@ -223,8 +223,13 @@ def main():
     print(f"   获取 {len(monthly)} 行，首条 {monthly[0]['date'] if monthly else '-'}，"
           f"末条 {monthly[-1]['date'] if monthly else '-'}")
 
-    print("3/3 拉取国内金价（上海黄金交易所 Au99.99）...")
-    domestic = fetch_domestic(read_token())
+    token = read_token()
+    if token:
+        print("3/3 拉取国内金价（上海黄金交易所 Au99.99）...")
+        domestic = fetch_domestic(token)
+    else:
+        print("3/3 跳过国内金价（未配置 token）")
+        domestic = []
     print(f"   获取 {len(domestic)} 行，首条 {domestic[0]['date'] if domestic else '-'}，"
           f"末条 {domestic[-1]['date'] if domestic else '-'}")
 
