@@ -165,40 +165,40 @@
       <el-row :gutter="12" class="stats-row">
         <el-col :xs="24" :sm="8">
           <div class="stat-item">
-            <div class="stat-label">判断涨跌方向：10 次约对 {{ Math.round(bt.dirHitRate / 10) }} 次</div>
+            <div class="stat-label">方向命中率</div>
             <div class="stat-value">{{ bt.dirHitRate.toFixed(0) }}%</div>
             <div class="meter">
               <div class="meter-bar" :style="{ width: Math.min(100, bt.dirHitRate) + '%' }"></div>
               <div class="meter-ref" :style="{ left: '50%' }" title="抛硬币水平 50%"></div>
             </div>
-            <div class="stat-sub">50% 是抛硬币水平——比瞎猜略强，但 4 成概率会看反方向，不能拿来押注。</div>
+            <div class="stat-sub">随机基准为 50%；当前水平具备有限统计优势，但误判率仍约 {{ 100 - Math.round(bt.dirHitRate) }}%。</div>
           </div>
         </el-col>
         <el-col :xs="24" :sm="8">
           <div class="stat-item">
-            <div class="stat-label">预测的具体涨跌：平均偏差 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点</div>
+            <div class="stat-label">平均绝对误差</div>
             <div class="stat-value">{{ bt.meanAbsErrorPct.toFixed(1) }}pp</div>
-            <div class="stat-sub">意思是：模型预测"涨 10%"，实际常常落在涨 3% 到涨 17% 之间——方向可参考，具体数字别当真。</div>
+            <div class="stat-sub">当模型预测上涨 10% 时，实际结果通常分布于约 +3% 至 +17% 区间，点位精度有限。</div>
           </div>
         </el-col>
         <el-col :xs="24" :sm="8">
           <div class="stat-item">
-            <div class="stat-label">预测区间：10 次里约 {{ Math.round(bt.bandCoverage / 10) }} 次兜得住</div>
+            <div class="stat-label">90% 区间实际覆盖率</div>
             <div class="stat-value">{{ bt.bandCoverage.toFixed(0) }}%</div>
             <div class="meter">
               <div class="meter-bar meter-warn" :style="{ width: Math.min(100, bt.bandCoverage) + '%' }"></div>
               <div class="meter-ref" :style="{ left: '90%' }" title="模型宣称的 90%"></div>
             </div>
-            <div class="stat-sub">模型说"90% 概率落在区间里"，实际只有 {{ bt.bandCoverage.toFixed(0) }}% 兜住——真实行情经常比模型更猛，别把区间当保险。</div>
+            <div class="stat-sub">实际覆盖率低于名义水平，表明该区间系统性偏窄，不宜作为风险保障依据。</div>
           </div>
         </el-col>
       </el-row>
 
       <div class="bt-faq">
-        <div class="sec-sub">第一次看这页？先回答你三个问题</div>
-        <div class="faq-item"><b>这模型到底准不准？</b>直说：判断涨跌，10 次里能对 {{ Math.round(bt.dirHitRate / 10) }} 次左右（瞎猜是 5 次）；预测的涨跌幅平均会差 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点；它说的 90% 区间，实际只兜住 {{ bt.bandCoverage.toFixed(0) }}%。所以大方向能当个参考，具体数字别信，拿它下单就算了。</div>
-        <div class="faq-item"><b>它为什么会跑偏？</b>因为这模型只会一件事：把过去的价格走势顺着往后画。明天打仗、突然降息、央行大买黄金——这些它全都不知道，也没法知道。下面那张表把历史上跑偏最狠的几次挑了出来，旁边列着当时正在发生的大事，一眼就能看出每次错在哪。</div>
-        <div class="faq-item"><b>那这页到底怎么用？</b>三个实在的用法：第一，方向当背景音，别当命令；第二，重点盯区间的下沿，把它当成"最坏能到哪"，提前想好心理和仓位的准备；第三，下单前翻一眼「事件时间线」，最近有大事件临近的话，这页的参考价值就再打个折。</div>
+        <div class="sec-sub">使用说明与解读</div>
+        <div class="faq-item"><b>一、该模型的准确度如何？</b>基于全历史滚动回测（{{ bt.count }} 次）：方向命中率 {{ bt.dirHitRate.toFixed(0) }}%（随机基准 50%）；平均绝对误差 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点；名义 90% 置信区间的实际覆盖率为 {{ bt.bandCoverage.toFixed(0) }}%，低于理论值。上述指标表明：模型对方向的判断存在有限的统计优势，但幅度误差与区间低估问题显著，预测结果应视为参考性信息，而非投资决策依据。</div>
+        <div class="faq-item"><b>二、预测产生偏差的原因是什么？</b>本模型为纯统计模型，仅依据历史价格序列外推，未纳入货币政策、地缘政治、央行购金等基本面变量。当重大事件发生、价格运行脱离历史统计规律时，模型将出现系统性偏差。下方表格列出回测中误差最大的五次样本及其窗口内发生的重大事件，可作为偏差成因的参考。</div>
+        <div class="faq-item"><b>三、应如何使用本页预测结果？</b>其一，将方向判断作为背景性参考，而非操作指令；其二，重点关注区间下沿，将其视为潜在不利情形，用于风险评估与仓位管理；其三，重大事件临近时（参见「事件时间线」页），预测的可靠性显著下降，应相应调低其参考权重。</div>
       </div>
 
       <div class="sec-sub">最近 12 次回测明细</div>
@@ -410,7 +410,8 @@ const btRecent = computed(() => bt.value.points.slice(-12).reverse())
 
 const btSummary = computed(() => {
   const b = bt.value
-  return `把模型放回历史模拟预测了 ${b.count} 次：判断"涨还是跌"的准确率是 ${b.dirHitRate.toFixed(0)}%（10 次约对 ${Math.round(b.dirHitRate / 10)} 次，抛硬币是 5 次）；预测的具体涨跌幅度平均偏差 ${b.meanAbsErrorPct.toFixed(1)} 个百分点；给出的价格区间只有 ${b.bandCoverage.toFixed(0)}% 的概率兜得住（模型自称 90%）。一句话：方向可以瞄一眼，具体数字别较真，下单别靠它。`
+  const missRate = Math.max(0, 100 - b.dirHitRate)
+  return `回测结果（样本 ${b.count} 次，滚动窗口，每 22 个交易日取样一次，预测期 60 个交易日）：方向判断命中率 ${b.dirHitRate.toFixed(0)}%，高于随机基准（50%），但误判率仍约 ${missRate.toFixed(0)}%；预测涨跌幅的平均绝对偏差 ${b.meanAbsErrorPct.toFixed(1)} 个百分点；名义 90% 置信区间的实际覆盖率 ${b.bandCoverage.toFixed(0)}%，低于理论值。综上，该模型对方向的判断具有有限参考价值，点位预测误差较大，不宜作为投资决策依据。`
 })
 
 // ---- 今日预测记录（localStorage 持久化，打开自动结算） ----
