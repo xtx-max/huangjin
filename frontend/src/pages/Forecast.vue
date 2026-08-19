@@ -195,10 +195,10 @@
       </el-row>
 
       <div class="bt-faq">
-        <div class="sec-sub">给第一次看的朋友：三个问题看懂这页</div>
-        <div class="faq-item"><b>这模型准吗？</b>方向 10 次约对 {{ Math.round(bt.dirHitRate / 10) }} 次（抛硬币是 5 次），具体幅度平均偏 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点，区间只有 {{ bt.bandCoverage.toFixed(0) }}% 的概率兜住。<b>结论：只能当参考风向，绝不能当买卖依据。</b></div>
-        <div class="faq-item"><b>为什么会不准？</b>模型只会"看着过去的走势画延长线"，它不知道明天会不会打仗、会不会突然降息。下面"最不准的 5 次"表里列了每次跑偏时发生的重大事件——那些就是模型看不见的东西。</div>
-        <div class="faq-item"><b>那我该怎么用？</b>① 看"方向"当参考；② 重点看区间的下沿，把它当"可能的最坏情况"来做风险准备；③ 配合「事件时间线」页，如果近期有大事件临近，预测的可靠性会进一步下降。</div>
+        <div class="sec-sub">第一次看这页？先回答你三个问题</div>
+        <div class="faq-item"><b>这模型到底准不准？</b>直说：判断涨跌，10 次里能对 {{ Math.round(bt.dirHitRate / 10) }} 次左右（瞎猜是 5 次）；预测的涨跌幅平均会差 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点；它说的 90% 区间，实际只兜住 {{ bt.bandCoverage.toFixed(0) }}%。所以大方向能当个参考，具体数字别信，拿它下单就算了。</div>
+        <div class="faq-item"><b>它为什么会跑偏？</b>因为这模型只会一件事：把过去的价格走势顺着往后画。明天打仗、突然降息、央行大买黄金——这些它全都不知道，也没法知道。下面那张表把历史上跑偏最狠的几次挑了出来，旁边列着当时正在发生的大事，一眼就能看出每次错在哪。</div>
+        <div class="faq-item"><b>那这页到底怎么用？</b>三个实在的用法：第一，方向当背景音，别当命令；第二，重点盯区间的下沿，把它当成"最坏能到哪"，提前想好心理和仓位的准备；第三，下单前翻一眼「事件时间线」，最近有大事件临近的话，这页的参考价值就再打个折。</div>
       </div>
 
       <div class="sec-sub">最近 12 次回测明细</div>
@@ -410,7 +410,7 @@ const btRecent = computed(() => bt.value.points.slice(-12).reverse())
 
 const btSummary = computed(() => {
   const b = bt.value
-  return `把模型放回历史模拟预测了 ${b.count} 次：判断"涨还是跌"的准确率是 ${b.dirHitRate.toFixed(0)}%（10 次约对 ${Math.round(b.dirHitRate / 10)} 次，抛硬币是 5 次）；预测的具体涨跌幅度平均偏差 ${b.meanAbsErrorPct.toFixed(1)} 个百分点；给出的价格区间只有 ${b.bandCoverage.toFixed(0)}% 的概率兜得住（模型自称 90%）。总体而言：方向有一定参考价值，具体点位不可靠——请只当参考，不当买卖依据。`
+  return `把模型放回历史模拟预测了 ${b.count} 次：判断"涨还是跌"的准确率是 ${b.dirHitRate.toFixed(0)}%（10 次约对 ${Math.round(b.dirHitRate / 10)} 次，抛硬币是 5 次）；预测的具体涨跌幅度平均偏差 ${b.meanAbsErrorPct.toFixed(1)} 个百分点；给出的价格区间只有 ${b.bandCoverage.toFixed(0)}% 的概率兜得住（模型自称 90%）。一句话：方向可以瞄一眼，具体数字别较真，下单别靠它。`
 })
 
 // ---- 今日预测记录（localStorage 持久化，打开自动结算） ----
