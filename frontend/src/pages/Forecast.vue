@@ -153,36 +153,49 @@
         </div>
       </template>
 
+      <div class="bt-summary">
+        <div class="bt-summary-title">一句话总结</div>
+        <div class="bt-summary-text">{{ btSummary }}</div>
+      </div>
+
       <el-row :gutter="12" class="stats-row">
-        <el-col :xs="12" :sm="6">
+        <el-col :xs="24" :sm="8">
           <div class="stat-item">
-            <div class="stat-label">方向命中率</div>
+            <div class="stat-label">判断涨跌方向：10 次约对 {{ Math.round(bt.dirHitRate / 10) }} 次</div>
             <div class="stat-value">{{ bt.dirHitRate.toFixed(0) }}%</div>
-            <div class="stat-sub">预测涨跌与实际同向的比例</div>
+            <div class="meter">
+              <div class="meter-bar" :style="{ width: Math.min(100, bt.dirHitRate) + '%' }"></div>
+              <div class="meter-ref" :style="{ left: '50%' }" title="抛硬币水平 50%"></div>
+            </div>
+            <div class="stat-sub">50% 是抛硬币水平——比瞎猜略强，但 4 成概率会看反方向，不能拿来押注。</div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
+        <el-col :xs="24" :sm="8">
           <div class="stat-item">
-            <div class="stat-label">平均绝对误差</div>
+            <div class="stat-label">预测的具体涨跌：平均偏差 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点</div>
             <div class="stat-value">{{ bt.meanAbsErrorPct.toFixed(1) }}pp</div>
-            <div class="stat-sub">预测涨跌幅与实际之差的平均</div>
+            <div class="stat-sub">意思是：模型预测"涨 10%"，实际常常落在涨 3% 到涨 17% 之间——方向可参考，具体数字别当真。</div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
+        <el-col :xs="24" :sm="8">
           <div class="stat-item">
-            <div class="stat-label">90% 区间覆盖率</div>
+            <div class="stat-label">预测区间：10 次里约 {{ Math.round(bt.bandCoverage / 10) }} 次兜得住</div>
             <div class="stat-value">{{ bt.bandCoverage.toFixed(0) }}%</div>
-            <div class="stat-sub">实际价落入预测区间的比例（理想≈90%）</div>
-          </div>
-        </el-col>
-        <el-col :xs="12" :sm="6">
-          <div class="stat-item">
-            <div class="stat-label">回测次数</div>
-            <div class="stat-value">{{ bt.count }}</div>
-            <div class="stat-sub">{{ backtestSeriesLabel }}</div>
+            <div class="meter">
+              <div class="meter-bar meter-warn" :style="{ width: Math.min(100, bt.bandCoverage) + '%' }"></div>
+              <div class="meter-ref" :style="{ left: '90%' }" title="模型宣称的 90%"></div>
+            </div>
+            <div class="stat-sub">模型说"90% 概率落在区间里"，实际只有 {{ bt.bandCoverage.toFixed(0) }}% 兜住——真实行情经常比模型更猛，别把区间当保险。</div>
           </div>
         </el-col>
       </el-row>
+
+      <div class="bt-faq">
+        <div class="sec-sub">给第一次看的朋友：三个问题看懂这页</div>
+        <div class="faq-item"><b>这模型准吗？</b>方向 10 次约对 {{ Math.round(bt.dirHitRate / 10) }} 次（抛硬币是 5 次），具体幅度平均偏 {{ bt.meanAbsErrorPct.toFixed(1) }} 个百分点，区间只有 {{ bt.bandCoverage.toFixed(0) }}% 的概率兜住。<b>结论：只能当参考风向，绝不能当买卖依据。</b></div>
+        <div class="faq-item"><b>为什么会不准？</b>模型只会"看着过去的走势画延长线"，它不知道明天会不会打仗、会不会突然降息。下面"最不准的 5 次"表里列了每次跑偏时发生的重大事件——那些就是模型看不见的东西。</div>
+        <div class="faq-item"><b>那我该怎么用？</b>① 看"方向"当参考；② 重点看区间的下沿，把它当"可能的最坏情况"来做风险准备；③ 配合「事件时间线」页，如果近期有大事件临近，预测的可靠性会进一步下降。</div>
+      </div>
 
       <div class="sec-sub">最近 12 次回测明细</div>
       <el-table :data="btRecent" size="small" stripe>
@@ -399,7 +412,6 @@ const verdict = computed<Verdict>(() => {
 })
 
 // ---- 历史回测 ----
-const backtestSeriesLabel = computed(() => (kind.value === 'domestic' ? '国内金价 Au99.99' : '国际金价 XAU/USD'))
 const bt = computed(() => {
   const base = kind.value === 'domestic' ? data.domestic : data.internationalDaily
   return runBacktest(
@@ -409,6 +421,11 @@ const bt = computed(() => {
   )
 })
 const btRecent = computed(() => bt.value.points.slice(-12).reverse())
+
+const btSummary = computed(() => {
+  const b = bt.value
+  return `把模型放回历史模拟预测了 ${b.count} 次：判断"涨还是跌"的准确率是 ${b.dirHitRate.toFixed(0)}%（10 次约对 ${Math.round(b.dirHitRate / 10)} 次，抛硬币是 5 次）；预测的具体涨跌幅度平均偏差 ${b.meanAbsErrorPct.toFixed(1)} 个百分点；给出的价格区间只有 ${b.bandCoverage.toFixed(0)}% 的概率兜得住（模型自称 90%）。总体而言：方向有一定参考价值，具体点位不可靠——请只当参考，不当买卖依据。`
+})
 
 // ---- 今日预测记录（localStorage 持久化，打开自动结算） ----
 interface StoredPeriod {
@@ -844,6 +861,64 @@ function changeClass(v: number | null): string {
 }
 .backtest-card {
   margin-top: 24px;
+}
+.bt-summary {
+  background: linear-gradient(135deg, rgba(176, 138, 62, 0.1), rgba(176, 138, 62, 0.03));
+  border: 1px solid rgba(176, 138, 62, 0.3);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.bt-summary-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a6d1f;
+  margin-bottom: 8px;
+}
+.bt-summary-text {
+  font-size: 15px;
+  line-height: 1.9;
+  color: #3a3a3c;
+  text-align: justify;
+}
+.meter {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: #f0f0f2;
+  margin: 10px 0 6px;
+  overflow: visible;
+}
+.meter-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #b08a3e, #d9b25f);
+}
+.meter-bar.meter-warn {
+  background: linear-gradient(90deg, #c65f57, #e08a80);
+}
+.meter-ref {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 14px;
+  background: #1d1d1f;
+  opacity: 0.55;
+}
+.bt-faq {
+  margin-top: 20px;
+  border-top: 1px dashed #e6e6ec;
+  padding-top: 16px;
+}
+.faq-item {
+  font-size: 14px;
+  line-height: 2;
+  color: #3a3a3c;
+  margin-bottom: 10px;
+  text-align: justify;
+}
+.faq-item b {
+  color: #1d1d1f;
 }
 .bt-note-inline {
   font-size: 12px;
