@@ -143,6 +143,118 @@
       </el-table>
     </el-card>
 
+    <!-- 历史回测与预测成绩单 -->
+    <el-card shadow="never" class="page-card backtest-card reveal">
+      <template #header>
+        <div class="header-title">
+          <el-icon><Histogram /></el-icon>
+          <span>历史回测与预测成绩单</span>
+          <span class="bt-note-inline">每 22 个交易日滚动一次，用此前 250 日拟合，预测其后 60 日（共 {{ bt.count }} 次）</span>
+        </div>
+      </template>
+
+      <el-row :gutter="12" class="stats-row">
+        <el-col :xs="12" :sm="6">
+          <div class="stat-item">
+            <div class="stat-label">方向命中率</div>
+            <div class="stat-value">{{ bt.dirHitRate.toFixed(0) }}%</div>
+            <div class="stat-sub">预测涨跌与实际同向的比例</div>
+          </div>
+        </el-col>
+        <el-col :xs="12" :sm="6">
+          <div class="stat-item">
+            <div class="stat-label">平均绝对误差</div>
+            <div class="stat-value">{{ bt.meanAbsErrorPct.toFixed(1) }}pp</div>
+            <div class="stat-sub">预测涨跌幅与实际之差的平均</div>
+          </div>
+        </el-col>
+        <el-col :xs="12" :sm="6">
+          <div class="stat-item">
+            <div class="stat-label">90% 区间覆盖率</div>
+            <div class="stat-value">{{ bt.bandCoverage.toFixed(0) }}%</div>
+            <div class="stat-sub">实际价落入预测区间的比例（理想≈90%）</div>
+          </div>
+        </el-col>
+        <el-col :xs="12" :sm="6">
+          <div class="stat-item">
+            <div class="stat-label">回测次数</div>
+            <div class="stat-value">{{ bt.count }}</div>
+            <div class="stat-sub">{{ backtestSeriesLabel }}</div>
+          </div>
+        </el-col>
+      </el-row>
+
+      <div class="sec-sub">最近 12 次回测明细</div>
+      <el-table :data="btRecent" size="small" stripe>
+        <el-table-column prop="anchorDate" label="预测日" width="110" />
+        <el-table-column prop="targetDate" label="目标日" width="110" />
+        <el-table-column label="预测涨跌" align="right" width="100">
+          <template #default="{ row }"><span :class="changeClass(row.predictedPct)">{{ formatSigned(row.predictedPct, 1) }}%</span></template>
+        </el-table-column>
+        <el-table-column label="实际涨跌" align="right" width="100">
+          <template #default="{ row }"><span :class="changeClass(row.actualPct)">{{ formatSigned(row.actualPct, 1) }}%</span></template>
+        </el-table-column>
+        <el-table-column label="误差" align="right" width="100">
+          <template #default="{ row }">{{ formatSigned(row.errorPct, 1) }}pp</template>
+        </el-table-column>
+        <el-table-column label="方向" width="70" align="center">
+          <template #default="{ row }">
+            <span :class="row.dirCorrect ? 'ok-hit' : 'ok-miss'">{{ row.dirCorrect ? '✓' : '✗' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="区间" width="70" align="center">
+          <template #default="{ row }">
+            <span :class="row.inBand ? 'ok-hit' : 'ok-miss'">{{ row.inBand ? '✓' : '✗' }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="sec-sub">最不准的 5 次与可能原因（窗口内重大事件）</div>
+      <el-table :data="bt.worst" size="small">
+        <el-table-column prop="anchorDate" label="预测日" width="110" />
+        <el-table-column label="误差" width="110" align="right">
+          <template #default="{ row }">{{ formatSigned(row.errorPct, 1) }}pp</template>
+        </el-table-column>
+        <el-table-column label="窗口内重大事件（可能的偏差原因）" min-width="300">
+          <template #default="{ row }">
+            <span v-if="row.events.length > 0" class="cause-list">
+              {{ eventTitles(row.events) }}
+            </span>
+            <span v-else class="cause-empty">窗口内无记录在库的重大事件，偏差更可能来自趋势惯性或突发事件</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="sec-sub record-head">
+        <span>今日预测记录（本浏览器保存，每次打开自动对照最新行情结算）</span>
+        <el-button size="small" type="primary" @click="recordToday">
+          <el-icon><Timer /></el-icon> 记录今日预测
+        </el-button>
+      </div>
+      <el-table v-if="recordsView.length > 0" :data="recordsView" size="small" stripe>
+        <el-table-column prop="createdAt" label="记录日" width="110" />
+        <el-table-column prop="label" label="时点" width="100" />
+        <el-table-column prop="targetDate" label="目标日" width="110" />
+        <el-table-column label="预测价" align="right" width="100">
+          <template #default="{ row }">{{ row.predicted.toFixed(2) }}</template>
+        </el-table-column>
+        <el-table-column label="区间" align="right" width="170">
+          <template #default="{ row }">{{ row.low.toFixed(0) }} ~ {{ row.high.toFixed(0) }}</template>
+        </el-table-column>
+        <el-table-column label="实际价" align="right" width="100">
+          <template #default="{ row }">{{ row.actual === null ? '—' : row.actual.toFixed(2) }}</template>
+        </el-table-column>
+        <el-table-column label="状态" width="110" align="center">
+          <template #default="{ row }">
+            <el-tag size="small" :type="row.status === '区间内' ? 'success' : row.status === '区间外' ? 'danger' : 'info'">
+              {{ row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div v-else class="bt-empty">还没有记录：点击「记录今日预测」，从今天开始累积你的模型成绩单。</div>
+    </el-card>
+
     <!-- 模型说明 -->
     <el-card shadow="never" class="page-card model-card reveal">
       <template #header>
@@ -164,12 +276,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
-import { Compass, DataAnalysis, InfoFilled } from '@element-plus/icons-vue'
+import { Compass, DataAnalysis, Histogram, InfoFilled, Timer } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { loadGoldPrices } from '@/data/goldPrices'
 import { loadEvents } from '@/data/events'
 import { loadNews } from '@/data/news'
 import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { forecastSeries } from '@/utils/forecast'
+import { runBacktest } from '@/utils/backtest'
 import { CHART_LEGEND, CHART_TOOLTIP, CHART_X, CHART_Y } from '@/utils/chartTheme'
 import { usePageMotion } from '@/composables/usePageMotion'
 import AnalysisSections from '@/components/AnalysisSections.vue'
@@ -283,6 +397,110 @@ const verdict = computed<Verdict>(() => {
     holt,
   }
 })
+
+// ---- 历史回测 ----
+const backtestSeriesLabel = computed(() => (kind.value === 'domestic' ? '国内金价 Au99.99' : '国际金价 XAU/USD'))
+const bt = computed(() => {
+  const base = kind.value === 'domestic' ? data.domestic : data.internationalDaily
+  return runBacktest(
+    base.map((p) => p.date),
+    base.map((p) => p.close),
+    eventLib,
+  )
+})
+const btRecent = computed(() => bt.value.points.slice(-12).reverse())
+
+// ---- 今日预测记录（localStorage 持久化，打开自动结算） ----
+interface StoredPeriod {
+  label: string
+  targetDate: string
+  predicted: number
+  low: number
+  high: number
+  actual: number | null
+  status: string
+}
+interface StoredRecord {
+  id: string
+  createdAt: string
+  kind: string
+  base: number
+  periods: StoredPeriod[]
+}
+const REC_KEY = 'gold-forecast-records-v1'
+const records = ref<StoredRecord[]>([])
+try {
+  records.value = JSON.parse(localStorage.getItem(REC_KEY) || '[]') as StoredRecord[]
+} catch {
+  records.value = []
+}
+
+function saveRecords() {
+  localStorage.setItem(REC_KEY, JSON.stringify(records.value))
+}
+
+function evaluateRecords() {
+  const base = kind.value === 'domestic' ? data.domestic : data.internationalDaily
+  const lastD = base[base.length - 1].date
+  let changed = false
+  for (const rec of records.value) {
+    if (rec.kind !== kind.value) continue
+    for (const p of rec.periods) {
+      if (p.status === '待验证' && p.targetDate <= lastD) {
+        const row = base.find((r) => r.date >= p.targetDate)
+        if (row) {
+          p.actual = row.close
+          p.status = row.close >= p.low && row.close <= p.high ? '区间内' : '区间外'
+          changed = true
+        }
+      }
+    }
+  }
+  if (changed) saveRecords()
+}
+
+function recordToday() {
+  const periods: StoredPeriod[] = [
+    { label: '明天', key: 1 },
+    { label: '一周后', key: 5 },
+    { label: '一个月后', key: 22 },
+    { label: '三个月后', key: 66 },
+    { label: '六个月后', key: 126 },
+  ].map(({ label, key }) => {
+    const i = key - 1
+    const reg = fc.value.reg[i]
+    const holt = fc.value.holt[i]
+    return {
+      label,
+      targetDate: fc.value.dates[i],
+      predicted: (reg + holt) / 2,
+      low: fc.value.low[i],
+      high: fc.value.high[i],
+      actual: null,
+      status: '待验证',
+    }
+  })
+  records.value.unshift({
+    id: String(Date.now()),
+    createdAt: new Date().toISOString().slice(0, 10),
+    kind: kind.value,
+    base: lastClose.value,
+    periods,
+  })
+  if (records.value.length > 50) records.value = records.value.slice(0, 50)
+  saveRecords()
+  ElMessage.success('已记录今日预测，之后每次打开本站会自动对照行情结算。')
+}
+
+function eventTitles(evs: Array<{ title: string }>): string {
+  return evs.map((e) => e.title.split('：')[0]).join('；')
+}
+
+const recordsView = computed(() =>
+  records.value
+    .filter((r) => r.kind === kind.value)
+    .flatMap((r) => r.periods.map((p) => ({ ...p, createdAt: r.createdAt }))),
+)
 
 interface Section {
   heading: string
@@ -583,6 +801,7 @@ onMounted(() => {
   renderChart()
   window.addEventListener('resize', handleResize)
   refreshQuotes()
+  evaluateRecords()
 })
 
 watch([kind, fitRange], () => {
@@ -622,6 +841,50 @@ function changeClass(v: number | null): string {
 .page-card {
   border: none;
   border-radius: 18px;
+}
+.backtest-card {
+  margin-top: 24px;
+}
+.bt-note-inline {
+  font-size: 12px;
+  font-weight: 400;
+  color: #4a4a50;
+}
+.sec-sub {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 18px 0 10px;
+  letter-spacing: -0.01em;
+}
+.record-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ok-hit {
+  color: #4c8a63;
+  font-weight: 700;
+}
+.ok-miss {
+  color: #c65f57;
+  font-weight: 700;
+}
+.cause-list {
+  font-size: 13px;
+  color: #3a3a3c;
+  line-height: 1.7;
+}
+.cause-empty {
+  font-size: 13px;
+  color: #7a7a80;
+}
+.bt-empty {
+  font-size: 13px;
+  color: #7a7a80;
+  padding: 12px 0;
 }
 .model-card {
   margin-top: 24px;
