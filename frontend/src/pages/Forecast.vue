@@ -17,9 +17,13 @@
             <span>金价预测</span>
             <el-tag size="small" type="warning" effect="plain">{{ seriesName }}</el-tag>
             <el-tag size="small" type="info" effect="plain">数据截至 {{ lastDate }}</el-tag>
-            <el-tag v-if="livePoint" size="small" type="success" effect="plain">
-              实时 {{ livePoint.close.toFixed(2) }} {{ unit }}（已纳入预测）
+            <el-tag v-if="kind === 'domestic' && liveQuotes?.domestic" size="small" type="success" effect="plain">
+              盘中参考 {{ liveQuotes.domestic.price.toFixed(2) }} {{ unit }}（不参与预测）
             </el-tag>
+            <el-tag v-else-if="kind === 'intl' && liveQuotes?.intl" size="small" type="success" effect="plain">
+              盘中参考 {{ liveQuotes.intl.price.toFixed(2) }} {{ unit }}（不参与预测）
+            </el-tag>
+            <el-tag size="small" type="warning" effect="plain">预测基准：最近完整交易日收盘，全天固定</el-tag>
           </div>
           <div class="header-controls">
             <span class="control-label">品种</span>
@@ -321,7 +325,6 @@ const unit = computed(() => (kind.value === 'domestic' ? '元/克' : '美元/盎
 
 const liveQuotes = ref<LiveQuotes | null>(null)
 let quoteTimer: number | null = null
-const todayIso = new Date().toISOString().slice(0, 10)
 
 function scheduleQuotes(ms: number) {
   if (quoteTimer !== null) window.clearTimeout(quoteTimer)
@@ -337,28 +340,11 @@ async function refreshQuotes() {
   }
 }
 
-/** 当日实时价（若晚于静态数据尾端，则注入序列参与预测） */
-const livePoint = computed<{ date: string; close: number } | null>(() => {
-  if (kind.value === 'domestic' && liveQuotes.value?.domestic) {
-    return { date: todayIso, close: liveQuotes.value.domestic.price }
-  }
-  if (kind.value === 'intl' && liveQuotes.value?.intl) {
-    return { date: todayIso, close: liveQuotes.value.intl.price }
-  }
-  return null
-})
-
-const allSeries = computed<Array<{ date: string; close: number }>>(() => {
-  const base =
-    kind.value === 'domestic'
-      ? data.domestic.map((p) => ({ date: p.date, close: p.close }))
-      : data.internationalDaily.map((p) => ({ date: p.date, close: p.close }))
-  const lp = livePoint.value
-  if (lp && lp.date > base[base.length - 1].date) {
-    return [...base, lp]
-  }
-  return base
-})
+const allSeries = computed<Array<{ date: string; close: number }>>(() =>
+  kind.value === 'domestic'
+    ? data.domestic.map((p) => ({ date: p.date, close: p.close }))
+    : data.internationalDaily.map((p) => ({ date: p.date, close: p.close })),
+)
 
 const fitted = computed<number[]>(() => {
   const all = allSeries.value
