@@ -33,6 +33,10 @@
               <el-icon><Compass /></el-icon>
               <span>金价预测</span>
             </el-menu-item>
+            <el-menu-item index="/strategy">
+              <el-icon><Opportunity /></el-icon>
+              <span>策略优化</span>
+            </el-menu-item>
             <el-menu-item index="/events">
               <el-icon><Flag /></el-icon>
               <span>事件时间线</span>
@@ -86,6 +90,7 @@ import {
   Reading,
   Flag,
   Compass,
+  Opportunity,
 } from '@element-plus/icons-vue'
 
 // public/logo.svg 会被复制到产物根目录；用稳定相对路径（哈希路由下文档路径不变），

@@ -55,6 +55,9 @@
           <div class="verdict-sub">
             当前 {{ lastClose.toFixed(2) }} {{ unit }} → 预计 {{ verdict.target.toFixed(2) }} {{ unit }}（{{ formatSigned(verdict.pct, 2) }}%）
           </div>
+          <div v-if="eventAdjust" class="verdict-adjust">
+            事件修正：{{ eventAdjust.text }}
+          </div>
         </div>
         <div class="verdict-right">
           <div class="verdict-band">
@@ -297,6 +300,8 @@ import { Compass, DataAnalysis, Histogram, InfoFilled, Timer } from '@element-pl
 import { ElMessage } from 'element-plus'
 import { loadGoldPrices } from '@/data/goldPrices'
 import { loadEvents } from '@/data/events'
+import { buildMergedIntlSeries, computeEventStats } from '@/utils/eventStats'
+import { classifyEvent } from '@/utils/eventClassify'
 import { loadNews } from '@/data/news'
 import { fetchLiveQuotes, type LiveQuotes } from '@/utils/liveQuotes'
 import { forecastSeries } from '@/utils/forecast'
@@ -322,6 +327,76 @@ const RANGE_DAYS: Record<FitRange, number> = { '6m': 180, '1y': 365, '3y': 1095,
 
 const seriesName = computed(() => (kind.value === 'domestic' ? '国内金价 Au99.99' : '国际金价 XAU/USD'))
 const unit = computed(() => (kind.value === 'domestic' ? '元/克' : '美元/盎司'))
+
+// ---- 事件修正：检测近 30 天重大事件，按历史同类事件平均影响调整参考值（明确标注） ----
+const mergedIntlSeries = buildMergedIntlSeries(data)
+const histEventStats = computeEventStats(eventLib, mergedIntlSeries)
+const liveEvents = ref<Array<{ title: string; date: string; impact: string }>>([])
+let liveEventTimer: number | null = null
+
+const EVENT_KEYWORDS = /美联储|央行|加息|降息|利率|缩表|QE|战争|冲突|袭击|危机|崩盘|暴跌|倒闭|违约|衰退|关税|制裁|通胀|大选|选举|购金|黄金/
+const LIVE_EV_SEARCH =
+  'https://search-api-web.eastmoney.com/search/jsonp?cb=x&param=' +
+  encodeURIComponent(
+    JSON.stringify({
+      uid: '', keyword: '美联储', type: ['cmsArticleWebOld'], client: 'web', clientType: 'web', clientVersion: 'curr',
+      param: { cmsArticleWebOld: { searchScope: 'default', sort: 'default', pageIndex: 1, pageSize: 20, preTag: '<em>', postTag: '</em>' } },
+    }),
+  )
+const LIVE_EV_COLUMNS =
+  'https://np-listapi.eastmoney.com/comm/web/getNewsByColumns?client=web&biz=web_news_col&column=351&order=1&needInteractData=0&page_index=1&page_size=50&req_trace=1'
+
+async function fetchLiveEventsOnce() {
+  const strip = (x: string) => x.replace(/<[^>]*>/g, '').trim()
+  const parse = async (url: string) => {
+    const resp = await fetch(url)
+    if (!resp.ok) throw new Error('HTTP')
+    const text = await resp.text()
+    const a = text.indexOf('(')
+    const b = text.lastIndexOf(')')
+    const json = a >= 0 && b > a ? JSON.parse(text.slice(a + 1, b)) : JSON.parse(text)
+    return (json?.result?.cmsArticleWebOld ?? json?.data?.list ?? []) as Array<Record<string, unknown>>
+  }
+  try {
+    let list: Array<Record<string, unknown>> = []
+    try { list = await parse(LIVE_EV_SEARCH) } catch { list = [] }
+    if (list.length === 0) list = await parse(LIVE_EV_COLUMNS)
+    const cutoff = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
+    liveEvents.value = list
+      .filter((r) => EVENT_KEYWORDS.test(strip(String(r.title ?? ''))))
+      .slice(0, 15)
+      .map((r) => ({
+        title: strip(String(r.title ?? '')),
+        date: String(r.date ?? r.showTime ?? '').slice(0, 10),
+        impact: classifyEvent(strip(String(r.title ?? ''))).impact,
+      }))
+      .filter((e) => e.date >= cutoff && e.impact !== '中性')
+  } catch {
+    /* 事件抓取失败不影响统计预测 */
+  }
+}
+
+interface EventAdjust {
+  text: string
+}
+
+const eventAdjust = computed<EventAdjust | null>(() => {
+  const recent = liveEvents.value
+  if (recent.length === 0) return null
+  const pos = recent.filter((e) => e.impact === '利好金价').length
+  const neg = recent.filter((e) => e.impact === '利空金价').length
+  if (pos === 0 && neg === 0) return null
+  const dir = pos >= neg ? '利好金价' : '利空金价'
+  const group = histEventStats.filter((st) => st.event.impact === dir && st.post30 !== null)
+  const effect = group.length > 0 ? group.reduce((a, st) => a + (st.post30 as number), 0) / group.length : 0
+  const adjustedPct = verdict.value.pct + effect
+  const adjustedTarget = lastClose.value * (1 + adjustedPct / 100)
+  const titles = recent.slice(0, 3).map((e) => e.title.split('：')[0]).join('、')
+  const dirWord = dir === '利好金价' ? '利好' : '利空'
+  return {
+    text: `近 30 天检测到 ${recent.length} 件${dirWord}事件（${titles} 等）。历史同类事件后 30 日平均涨跌 ${formatSigned(effect, 1)}%，修正后参考 ${adjustedTarget.toFixed(2)} ${unit.value}（${formatSigned(adjustedPct, 1)}%）。该修正仅为事件面提示，不改变上方统计预测与区间。`,
+  }
+})
 
 const liveQuotes = ref<LiveQuotes | null>(null)
 let quoteTimer: number | null = null
@@ -806,6 +881,8 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
   refreshQuotes()
   evaluateRecords()
+  fetchLiveEventsOnce()
+  liveEventTimer = window.setInterval(fetchLiveEventsOnce, 300000)
 })
 
 watch([kind, fitRange], () => {
@@ -815,6 +892,7 @@ watch([kind, fitRange], () => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   if (quoteTimer !== null) window.clearTimeout(quoteTimer)
+  if (liveEventTimer !== null) window.clearInterval(liveEventTimer)
   chart?.dispose()
   chart = null
 })
@@ -1024,6 +1102,15 @@ function changeClass(v: number | null): string {
   font-size: 15px;
   font-weight: 500;
   color: #ffffff;
+}
+.verdict-adjust {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #fff7e6;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 10px;
+  padding: 8px 12px;
 }
 .verdict-right {
   text-align: right;
